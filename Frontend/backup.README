@@ -1,0 +1,107 @@
+            <Pressable>
+              <View>
+                <TouchableOpacity>
+                  <Image
+                    source={require("../assets/images/5.png")}
+                    style={styles.ticket}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 45,
+                      left: 30,
+                      backgroundColor: "#1995AD",
+                      width: 100,
+                      height: 30,
+                      borderRadius: 20,
+                      flexDirection: "row",
+                      marginLeft: 15,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        padding: 5,
+                        marginLeft: 10,
+                        color: "white",
+                        fontWeight: 500,
+                      }}
+                    >
+                      UpComing
+                    </Text>
+                    <Text
+                      style={{
+                        padding: 5,
+                        marginLeft: 15,
+                        fontWeight: 500,
+                        width: 200,
+                      }}
+                    >
+                      24 March 2024
+                    </Text>
+                  </View>
+
+                  <View style={styles.arrival}>
+                    {/*Arrival Time */}
+
+                    <View>
+                      <View style={{ flexDirection: "row" }}>
+                        <Text
+                          style={{
+                            marginTop: 3,
+                            fontWeight: 500,
+                            fontSize: 20,
+                          }}
+                        >
+                          From
+                        </Text>
+                        <Ionicons
+                          name="arrow-down-circle-outline"
+                          size={24}
+                          color="black"
+                          marginLeft={10}
+                        />
+                      </View>
+                      <View>
+                        <Text marginTop={5}>6:30</Text>
+                      </View>
+                    </View>
+
+                    <View>
+                      <Text style={{ fontWeight: 500, fontSize: 40 }}>
+                        ........
+                      </Text>
+                    </View>
+
+                    {/* Departure Time */}
+
+                    <View>
+                      <View style={{ flexDirection: "row" }}>
+                        <Text
+                          style={{
+                            marginTop: 3,
+                            fontWeight: 500,
+                            fontSize: 20,
+                          }}
+                        >
+                          To
+                        </Text>
+                        <Ionicons
+                          name="arrow-up-circle-outline"
+                          size={24}
+                          color="black"
+                          marginLeft={10}
+                        />
+                      </View>
+                      <View>
+                        <Text marginTop={5}>18:30</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.booking}>
+                    <Text>Booking ID</Text>
+                    <Text>IZXDTMG123</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
