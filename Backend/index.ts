@@ -20,7 +20,7 @@ import { InvitationRoutes } from './src/routes/invitations';
 import { PaymentRoutes } from './src/routes/payment.routes';
 import { bookingRoutes } from './src/routes/bookings';
 import hotelAuthRoutes from './src/routes/hotelAuth';
-
+import { TourismRoutes } from './src/routes/Tourism';
 config();
 
 const app = express();
@@ -87,3 +87,5 @@ app.listen(port, () => {
   console.log(`💳 Flutterwave: ${process.env.FLW_PUBLIC_KEY ? '✅ Configured' : '❌ Missing'}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
+app.use('/api/v1/tourism', TourismRoutes);

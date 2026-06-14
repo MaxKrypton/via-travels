@@ -337,4 +337,37 @@ export const helpArticles = pgTable('help_articles', {
 });
 */
 
+// Via Travels — Tourism Data
+export const tourismCategories = pgEnum('tourism_category', [
+  'accommodation', 'attraction', 'activity', 'transport', 'permit'
+]);
 
+export const tourismEntries = pgTable('tourism_entries', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  category: tourismCategories('category').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  location: varchar('location', { length: 255 }),
+  priceRWF: integer('price_rwf').default(0),
+  priceUSD: integer('price_usd').default(0),
+  tags: text('tags').array(),
+  bookingContact: varchar('booking_contact', { length: 100 }),
+  lastVerified: timestamp('last_verified').defaultNow(),
+  createdBy: uuid('created_by').references(() => userTable.id),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull()
+});
+
+export const itineraries = pgTable('itineraries', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => userTable.id, { onDelete: 'cascade' }).notNull(),
+  rawText: text('raw_text').notNull(),
+  travelDates: varchar('travel_dates', { length: 100 }),
+  budget: varchar('budget', { length: 50 }),
+  groupSize: integer('group_size'),
+  interests: text('interests').array(),
+  durationDays: integer('duration_days'),
+  rating: integer('rating'),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+  updated_at: timestamp('updated_at').defaultNow().notNull()
+});

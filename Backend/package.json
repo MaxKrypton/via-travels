@@ -1,5 +1,5 @@
 {
-  "name": "nestly-backend",
+  "name": "via-travels-backend",
   "version": "1.0.0",
   "description": "backend for an nestly rental app",
   "main": "./dist/index.js",
@@ -16,6 +16,7 @@
     "dbMigrate": "drizzle-kit push"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@aws-sdk/client-s3": "^3.651.1",
     "@types/jsonwebtoken": "^9.0.6",
     "axios": "^1.9.0",
