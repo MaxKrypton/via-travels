@@ -25,6 +25,7 @@ const invitations_1 = require("./src/routes/invitations");
 const payment_routes_1 = require("./src/routes/payment.routes");
 const bookings_1 = require("./src/routes/bookings");
 const hotelAuth_1 = __importDefault(require("./src/routes/hotelAuth"));
+const Tourism_1 = require("./src/routes/Tourism");
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
@@ -66,6 +67,7 @@ app.use('/api/v1/invitation', authMiddleware_1.authMiddleware, invitations_1.Inv
 app.use('/api/v1/payment', payment_routes_1.PaymentRoutes);
 // User bookings routes - NEW
 app.use('/api/v1/my-bookings', bookings_1.bookingRoutes);
+app.use('/api/v1/tourism', Tourism_1.TourismRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);

@@ -16,13 +16,13 @@ exports.ReviewRoute = (0, express_1.Router)();
 exports.ReviewRoute.get('/all-reviews', (req, res) => {
     return Hotel_user_reviews_1.reviewService.getAllReviews(req, res);
 });
+// Get all reviews for a specific hotel
+exports.ReviewRoute.get('/hotel/:hotelId', (req, res) => {
+    return Hotel_user_reviews_1.reviewService.getSpecificHotelReview(req, res);
+});
 // Get a specific review
 exports.ReviewRoute.get('/:reviewId', (req, res) => {
     return Hotel_user_reviews_1.reviewService.getSpecificReview(req, res);
-});
-// Get a specific Hotel Review
-exports.ReviewRoute.get('/:hotelId', (req, res) => {
-    return Hotel_user_reviews_1.reviewService.getSpecificHotelReview(req, res);
 });
 // Create a review
 exports.ReviewRoute.post('/create/:hotelId/', authMiddleware_1.authMiddleware, RolesAndPermissions_1.rolesAndPermissions.hotelManagerNotPermitted, multer_1.upload.single('media'), (0, contentAwareImageMiddleware_1.default)({

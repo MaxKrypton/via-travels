@@ -92,9 +92,9 @@ const HotelProfile = () => {
           latitudeDelta: 0.02,
         });
 
-        setBg(hotelDetails.media[0].url);
-        setBaseprice(hotelDetails.rooms[0].roomFee);
-        setMenu(hotelDetails.menu_download_url);
+        setBg(hotelDetails.media?.[0]?.url);
+        setBaseprice(hotelDetails.rooms?.[0]?.roomFee);
+        setMenu(hotelDetails.menu_download_url || null);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -312,12 +312,14 @@ const HotelProfile = () => {
           </View>
 
           {/* Hotel Menu */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Hotel Menu</Text>
-            <View style={styles.menuContainer}>
-              <WebView source={{ uri: `${menu}` }} style={styles.webview} />
+          {menu ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Hotel Menu</Text>
+              <View style={styles.menuContainer}>
+                <WebView source={{ uri: menu }} style={styles.webview} />
+              </View>
             </View>
-          </View>
+          ) : null}
 
           {/* Booking Button */}
           <TouchableOpacity

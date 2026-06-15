@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.notifications = exports.wishlists = exports.videoSaves = exports.videoLikes = exports.videos = exports.reviews = exports.bookingRoomTypes = exports.bookings = exports.priceModifiers = exports.roomAvailability = exports.roomPricing = exports.room = exports.hotelPosts = exports.hotelMedia = exports.hotelManagement = exports.hotels = exports.otpTable = exports.userProfiles = exports.userRolesTable = exports.userTable = exports.paymentStatus = exports.mediaTypeCategories = exports.mediaType = exports.Roles = exports.paymentOptions = exports.hotelStatus = void 0;
+exports.itineraries = exports.tourismEntries = exports.tourismCategories = exports.notifications = exports.wishlists = exports.videoSaves = exports.videoLikes = exports.videos = exports.reviews = exports.bookingRoomTypes = exports.bookings = exports.priceModifiers = exports.roomAvailability = exports.roomPricing = exports.room = exports.hotelPosts = exports.hotelMedia = exports.hotelManagement = exports.hotels = exports.otpTable = exports.userProfiles = exports.userRolesTable = exports.userTable = exports.paymentStatus = exports.mediaTypeCategories = exports.mediaType = exports.Roles = exports.paymentOptions = exports.hotelStatus = void 0;
 const pg_core_1 = require("drizzle-orm/pg-core");
 // Enums
 exports.hotelStatus = (0, pg_core_1.pgEnum)("hotel_status", ["active", "inactive"]);
@@ -298,3 +298,35 @@ export const helpArticles = pgTable('help_articles', {
   updated_at: timestamp('updated_at').defaultNow().notNull()
 });
 */
+// Via Travels — Tourism Data
+exports.tourismCategories = (0, pg_core_1.pgEnum)('tourism_category', [
+    'accommodation', 'attraction', 'activity', 'transport', 'permit'
+]);
+exports.tourismEntries = (0, pg_core_1.pgTable)('tourism_entries', {
+    id: (0, pg_core_1.uuid)('id').defaultRandom().primaryKey(),
+    category: (0, exports.tourismCategories)('category').notNull(),
+    name: (0, pg_core_1.varchar)('name', { length: 255 }).notNull(),
+    description: (0, pg_core_1.text)('description'),
+    location: (0, pg_core_1.varchar)('location', { length: 255 }),
+    priceRWF: (0, pg_core_1.integer)('price_rwf').default(0),
+    priceUSD: (0, pg_core_1.integer)('price_usd').default(0),
+    tags: (0, pg_core_1.text)('tags').array(),
+    bookingContact: (0, pg_core_1.varchar)('booking_contact', { length: 100 }),
+    lastVerified: (0, pg_core_1.timestamp)('last_verified').defaultNow(),
+    createdBy: (0, pg_core_1.uuid)('created_by').references(() => exports.userTable.id),
+    created_at: (0, pg_core_1.timestamp)('created_at').defaultNow().notNull(),
+    updated_at: (0, pg_core_1.timestamp)('updated_at').defaultNow().notNull()
+});
+exports.itineraries = (0, pg_core_1.pgTable)('itineraries', {
+    id: (0, pg_core_1.uuid)('id').defaultRandom().primaryKey(),
+    userId: (0, pg_core_1.uuid)('user_id').references(() => exports.userTable.id, { onDelete: 'cascade' }).notNull(),
+    rawText: (0, pg_core_1.text)('raw_text').notNull(),
+    travelDates: (0, pg_core_1.varchar)('travel_dates', { length: 100 }),
+    budget: (0, pg_core_1.varchar)('budget', { length: 50 }),
+    groupSize: (0, pg_core_1.integer)('group_size'),
+    interests: (0, pg_core_1.text)('interests').array(),
+    durationDays: (0, pg_core_1.integer)('duration_days'),
+    rating: (0, pg_core_1.integer)('rating'),
+    created_at: (0, pg_core_1.timestamp)('created_at').defaultNow().notNull(),
+    updated_at: (0, pg_core_1.timestamp)('updated_at').defaultNow().notNull()
+});

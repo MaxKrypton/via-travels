@@ -69,6 +69,19 @@ class VideoService {
       }
     }
     */
+    getVideosByHotelId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, status, message } = yield Content_videos_1.videoRepository.getVideosByHotelId(req, res);
+                return res.status(status).json({ message, data });
+            }
+            catch (error) {
+                return res.status(helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+                    message: `Server error, ${error}`
+                });
+            }
+        });
+    }
     getAllVideos(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

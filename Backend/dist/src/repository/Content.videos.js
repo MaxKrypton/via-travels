@@ -145,6 +145,29 @@ class VideoRepo {
             }
         });
     }
+    getVideosByHotelId(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const hotel_id = req.params.hotelId;
+            try {
+                const videosData = yield database_1.database
+                    .select()
+                    .from(schema_1.videos)
+                    .where((0, drizzle_orm_1.eq)(schema_1.videos.hotel_id, hotel_id));
+                return {
+                    data: videosData,
+                    status: helpers_1.HttpStatusCodes.OK,
+                    message: "Hotel Videos Retrieved Successfully"
+                };
+            }
+            catch (error) {
+                return {
+                    data: '',
+                    message: error,
+                    status: helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR
+                };
+            }
+        });
+    }
     /*
     async getVideosByCategory(req: Request, res: Response): Promise<DataResponse> {
       try {

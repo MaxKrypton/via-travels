@@ -21,13 +21,25 @@ exports.sendVerificationEmail = sendVerificationEmail;
 const mailjet_1 = require("../repository/mailjet");
 const nodemailer_1 = require("../repository/nodemailer");
 const EmailingTemplates_1 = require("../utils/EmailingTemplates");
+// Unified sender: tries Gmail (nodemailer) first, falls back to Mailjet
+function sendEmailWithFallback(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield (0, nodemailer_1.sendEmailViaNodemailer)(data);
+        }
+        catch (nodemailerErr) {
+            console.warn('⚠️  Gmail/Nodemailer failed, trying Mailjet fallback...', nodemailerErr);
+            yield (0, mailjet_1.sendEmail)(data);
+        }
+    });
+}
 function sendComplainsEmail(_a) {
     return __awaiter(this, arguments, void 0, function* ({ firstname, complainerEmail, hotelName, subject, message }) {
         // Get the complaint email template
         const complainsEmails = EmailingTemplates_1.emailingOptions.clientComplains(firstname, complainerEmail, hotelName, subject, message);
         const viaEmail = "atnestly@gmail.com";
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: viaEmail,
                 toName: "Hotel Complaints Team",
                 subject: subject,
@@ -45,7 +57,7 @@ function sendHotelManagementCredentials(_a) {
         // Get the credentials email template
         const emailTemplateFormat = EmailingTemplates_1.emailingOptions.temporaryHotelAdminLoginPassword(username, password);
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: managerEmail,
                 toName: "Hotel Manager",
                 subject: subject || 'Hotel Management Credentials',
@@ -62,7 +74,7 @@ function sendForgotPasswordEmail(_a) {
     return __awaiter(this, arguments, void 0, function* ({ firstname, password, email }) {
         const emailTemplate = EmailingTemplates_1.emailingOptions.forgotPassword(firstname, password);
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: email,
                 toName: firstname || "User",
                 subject: 'Via Password Reset',
@@ -79,7 +91,7 @@ function sendPasswordUpdateEmail(_a) {
     return __awaiter(this, arguments, void 0, function* ({ firstname, password, email }) {
         const emailTemplate = EmailingTemplates_1.emailingOptions.updatePassword(firstname, password);
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: email,
                 toName: firstname || "User",
                 subject: 'Via Password Updated',
@@ -96,7 +108,7 @@ function inviteViaAdmin(_a) {
     return __awaiter(this, arguments, void 0, function* ({ inviteeUsername, inviteeEmail, emailTemplate }) {
         // Get the credentials email template
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: inviteeEmail,
                 toName: inviteeUsername,
                 subject: 'Via Admin Credentials',
@@ -113,7 +125,7 @@ function inviteHotelManager(_a) {
     return __awaiter(this, arguments, void 0, function* ({ inviteeUsername, inviteeEmail, emailTemplate }) {
         // Get the credentials email template
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: inviteeEmail,
                 toName: inviteeUsername,
                 subject: 'Hotel Management Credentials',
@@ -130,7 +142,7 @@ function inviteCustomer(_a) {
     return __awaiter(this, arguments, void 0, function* ({ inviteeUsername, inviteeEmail, emailTemplate }) {
         // Get the credentials email template
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: inviteeEmail,
                 toName: inviteeUsername,
                 subject: 'Customer Login Credentials',
@@ -147,7 +159,7 @@ function softwareGlitchEmail(_a) {
     return __awaiter(this, arguments, void 0, function* ({ username, emailTemplate }) {
         // Get the credentials email template
         try {
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: "ialainquentin@gmail.com",
                 toName: username,
                 subject: '[Action Needed]: Software Glitch Reported',
@@ -266,34 +278,19 @@ function sendVerificationEmail(_a) {
     </body>
     </html>
   `;
-        // Try Mailjet first, fallback to Nodemailer (Gmail) if it fails
+        // Send via Gmail first, fall back to Mailjet
         try {
-            console.log('📧 Attempting to send via Mailjet...');
-            yield (0, mailjet_1.sendEmail)({
+            yield sendEmailWithFallback({
                 to: email,
                 toName: firstname,
                 subject: '✉️ Verify Your Nestly Email Address',
                 htmlPart: emailTemplate,
             });
-            console.log('✅ Verification email sent successfully via Mailjet to:', email);
+            console.log('✅ Verification email sent to:', email);
         }
-        catch (mailjetError) {
-            console.warn('⚠️  Mailjet failed, trying Nodemailer (Gmail) fallback...');
-            console.error('Mailjet error:', mailjetError);
-            try {
-                yield (0, nodemailer_1.sendEmailViaNodemailer)({
-                    to: email,
-                    toName: firstname,
-                    subject: '✉️ Verify Your Nestly Email Address',
-                    htmlPart: emailTemplate,
-                });
-                console.log('✅ Verification email sent successfully via Nodemailer to:', email);
-            }
-            catch (nodemailerError) {
-                console.error('❌ Both Mailjet and Nodemailer failed!');
-                console.error('Nodemailer error:', nodemailerError);
-                throw new Error('Failed to send verification email with both services');
-            }
+        catch (error) {
+            console.error('❌ Failed to send verification email:', error);
+            throw new Error('Failed to send verification email');
         }
     });
 }

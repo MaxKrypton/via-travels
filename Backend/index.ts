@@ -69,6 +69,7 @@ app.use('/api/v1/payment', PaymentRoutes);
 
 // User bookings routes - NEW
 app.use('/api/v1/my-bookings', bookingRoutes);
+app.use('/api/v1/tourism', TourismRoutes);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: any) => {
@@ -87,5 +88,3 @@ app.listen(port, () => {
   console.log(`💳 Flutterwave: ${process.env.FLW_PUBLIC_KEY ? '✅ Configured' : '❌ Missing'}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
-
-app.use('/api/v1/tourism', TourismRoutes);

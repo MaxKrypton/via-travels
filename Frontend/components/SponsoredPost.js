@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions, Modal, Pressable, ScrollView, Animated } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Dimensions, Modal, Pressable, ScrollView, Animated } from "react-native";
 import React, { useContext, useState, useRef } from "react";
 import { Feather, AntDesign, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -243,13 +243,13 @@ const SponsoredPost = ({ posts }) => {
 
   return (
     <>
-      <FlatList
-        data={posts}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-      />
+      <View style={styles.listContainer}>
+        {posts.map((item) => (
+          <React.Fragment key={item.id?.toString()}>
+            {renderItem({ item })}
+          </React.Fragment>
+        ))}
+      </View>
       {renderExpandedPost()}
     </>
   );

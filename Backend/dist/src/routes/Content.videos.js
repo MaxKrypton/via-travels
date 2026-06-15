@@ -13,6 +13,10 @@ exports.VideoRoute = (0, express_1.Router)();
 exports.VideoRoute.get('/all', (req, res) => {
     return Content_videos_1.videoService.getAllVideos(req, res);
 });
+// Get videos by hotel ID
+exports.VideoRoute.get('/hotel/:hotelId', (req, res) => {
+    return Content_videos_1.videoService.getVideosByHotelId(req, res);
+});
 // Stream video with support for range requests
 exports.VideoRoute.get('/stream/:videoId', (req, res) => {
     return videostreaming_1.videoStreamingController.streamVideo(req, res);

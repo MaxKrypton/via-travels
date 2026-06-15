@@ -17,9 +17,9 @@ const helpers_1 = require("../utils/helpers");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = require("../repository/User");
 const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     try {
-        const token = ((_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1]) || req.cookies.access_token;
+        const token = ((_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1]) || ((_b = req.cookies) === null || _b === void 0 ? void 0 : _b.access_token);
         if (!token) {
             return res.status(helpers_1.HttpStatusCodes.UNAUTHORIZED).json({
                 message: "Access denied. No Token Provided"

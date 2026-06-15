@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import AuthContext from "./AuthContext";
 import * as SecureStore from "expo-secure-store";
-import { useSafeAreaFrame } from "react-native-safe-area-context";
+import { API_HOST } from "../services/config";
+import apiService from "../services/api";
 
 const UserContexProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -12,11 +13,7 @@ const UserContexProvider = ({ children }) => {
   const [currentID, setCurrentID] = useState(null);
   const [currentRoomId, setCurrentRoomId] = useState(null);
   const [review, setReview] = useState(null);
-  // Extract just the IP from EXPO_PUBLIC_API_URL (e.g. "http://192.168.15.162:8000/api/v1" → "192.168.15.162")
-  // Screens use: http://${ip}:8000/... so ip must be just the hostname with no port
-  const ip = process.env.EXPO_PUBLIC_API_URL
-    ? process.env.EXPO_PUBLIC_API_URL.replace(/^https?:\/\//, '').split(':')[0]
-    : "192.168.15.162"
+  const ip = API_HOST;
   const [signedIn, setSignedIn] = useState(true)
 
 // Initialize auth on app start
@@ -35,16 +32,19 @@ const UserContexProvider = ({ children }) => {
           const userData = JSON.parse(storedUserData);
           setUser(userData);
           setAuthToken(storedToken);
+          apiService.setAuthToken(storedToken);
           setIsAuthenticated(true);
           console.log("✅ User session restored");
         } else {
           // Token exists but no user data - clear token
           await SecureStore.deleteItemAsync("authToken");
+          apiService.setAuthToken(null);
           setIsAuthenticated(false);
         }
       } else {
         // No token found - user is not authenticated
         setIsAuthenticated(false);
+        apiService.setAuthToken(null);
       }
 
       // Load hotel data
@@ -75,6 +75,7 @@ const UserContexProvider = ({ children }) => {
       await SecureStore.setItemAsync("userData", JSON.stringify(userData));
 
       setAuthToken(token);
+      apiService.setAuthToken(token);
       setUser(userData);
       setIsAuthenticated(true);
 
@@ -91,6 +92,7 @@ const UserContexProvider = ({ children }) => {
       await SecureStore.deleteItemAsync("userData");
 
       setAuthToken(null);
+      apiService.setAuthToken(null);
       setUser(null);
       setIsAuthenticated(false);
 

@@ -3,12 +3,9 @@ import {
   View,
   SafeAreaView,
   StatusBar,
-  Image,
   TextInput,
   TouchableOpacity,
-  Pressable,
   ScrollView,
-  Modal,
 } from "react-native";
 import React, {useEffect, useState} from "react";
 import { Feather } from "@expo/vector-icons";
@@ -25,9 +22,8 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
-import WelcomeScreen from "./WelcomeScreen";
 import TopHotels from "../components/TopHotels";
-import axios from "axios";
+import apiService from "../services/api";
 
 
 SplashScreen.preventAutoHideAsync();
@@ -38,10 +34,8 @@ const HomeScreen = () => {
     'Poppins': require('../assets/fonts/Poppins-Regular.ttf'),
     'Inter': require('../assets/fonts/Inter-VariableFont_opsz,wght.ttf'),
   });
-  const {signedIn, loadAuthStatus, authStatus, setSignedIn, showLogIn, saveHotelData, setHotelData, hotelData, ip} = useContext(AuthContext)
-  const [posts, setPosts] = useState()
-  const hotelURL = `http://${ip}:8000/api/v1/hotels/all-hotels`
-  const postUrl = `http://${ip}:8000/api/v1/hotels/posts/All-hotels`
+  const { saveHotelData } = useContext(AuthContext)
+  const [posts, setPosts] = useState([])
 
   useEffect(() => {
     if (loaded || error) {
@@ -51,45 +45,29 @@ const HomeScreen = () => {
   }, [loaded, error]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      await loadAuthStatus("isLoggedIn");
-      
-      console.log("The status of authStatus is", signedIn);
+    const fetchHomeData = async () => {
+      const [hotelResult, postResult] = await Promise.allSettled([
+        apiService.hotels.getAll(),
+        apiService.posts.getAll(),
+      ]);
 
-      if (authStatus === "loggedIn") {
-        setSignedIn(true);
+      if (hotelResult.status === 'fulfilled') {
+        saveHotelData(hotelResult.value.data?.data || []);
       } else {
-        setSignedIn(false);
+        const message = hotelResult.reason?.response?.data?.message || hotelResult.reason?.message || 'Unable to reach the hotels API';
+        console.log(`Hotel request failed: ${message}`);
+      }
+
+      if (postResult.status === 'fulfilled') {
+        setPosts(postResult.value.data?.data || []);
+      } else {
+        const message = postResult.reason?.response?.data?.message || postResult.reason?.message || 'Unable to reach the posts API';
+        console.log(`Posts request failed: ${message}`);
       }
     };
-    
-    checkAuth();
-    console.log("Current auth status:", authStatus); // Debug log
 
-    // GET the hotel details from the database
-
-    axios.get(hotelURL)
-    .then((response) =>{
-      const result = response.data
-      const hotels = result.data
-      saveHotelData(hotels)
-    }).catch((error) => {
-      console.log(`The Error we are facing is ${error}`);
-    })
-
-  }, [authStatus]);
-
-  useEffect(() =>{
-    axios.get(postUrl)
-    .then((response) =>{
-      const result = response.data
-      const postData = result.data
-      setPosts(postData)
-    })
-    .catch(error => {
-      console.log(`We are facing an error getting the posts, ${error}`)
-    })
-  }, [])
+    fetchHomeData();
+  }, []);
 
   if (!loaded && !error) {
     return null;
@@ -97,14 +75,10 @@ const HomeScreen = () => {
 
     // UI Design
 
-  if(!signedIn){
-    return <Modal visible={showLogIn} animationType="slide">
-      <WelcomeScreen/>
-    </Modal>
-  } else{ return (
+  return (
     <View style={styles.container}>
       <LinearGradient
-   i     colors={["rgb(247, 247, 247)", "rgb(247, 247, 247)"]}
+        colors={["rgb(247, 247, 247)", "rgb(247, 247, 247)"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         
@@ -218,7 +192,7 @@ const HomeScreen = () => {
         </ScrollView>
       </LinearGradient>
     </View>
-  );}
+  );
 
  
 };

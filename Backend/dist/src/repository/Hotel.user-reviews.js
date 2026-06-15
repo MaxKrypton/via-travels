@@ -131,6 +131,7 @@ class ReviewRepo {
                     .select({
                     reviewId: schema_1.reviews.id,
                     userId: schema_1.userTable.id,
+                    username: schema_1.userTable.username,
                     hotelId: schema_1.hotels.id,
                     rating: schema_1.reviews.rating,
                     mediaUrl: schema_1.reviews.mediaUrl,

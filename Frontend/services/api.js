@@ -1,14 +1,19 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { API_BASE_URL, API_TIMEOUT_MS, ITINERARY_TIMEOUT_MS } from './config';
 
-// Get base URL from environment or default
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.15.162:8000/api/v1';
+const getRequestUrl = (config) => {
+  const baseURL = config?.baseURL || '';
+  const url = config?.url || '';
+  return url.startsWith('http') ? url : `${baseURL}${url}`;
+};
 
 class ApiService {
   constructor() {
+    this.authToken = null;
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 30000,
+      timeout: API_TIMEOUT_MS,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -17,7 +22,7 @@ class ApiService {
     // Add request interceptor for auth token
     this.client.interceptors.request.use(
       async (config) => {
-        const token = await AsyncStorage.getItem('authToken');
+        const token = this.authToken || await SecureStore.getItemAsync('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -29,14 +34,25 @@ class ApiService {
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
+        const method = error.config?.method?.toUpperCase() || 'REQUEST';
+        const url = getRequestUrl(error.config);
+        const status = error.response?.status ? ` (${error.response.status})` : '';
+        const message = error.response?.data?.message || error.message || 'Request failed';
+        console.log(`[api] ${method} ${url} failed${status}: ${message}`);
+
         if (error.response?.status === 401) {
           // Handle unauthorized - clear token and redirect to login
-          AsyncStorage.removeItem('authToken');
+          this.setAuthToken(null);
+          await SecureStore.deleteItemAsync('authToken');
         }
         return Promise.reject(error);
       }
     );
+  }
+
+  setAuthToken(token) {
+    this.authToken = token || null;
   }
 
   // ============= AUTHENTICATION =============
@@ -272,6 +288,22 @@ class ApiService {
     sendGlitch: (data) => this.client.post('/complaints/glitch/send', data),
   };
 
+
+  // ============= TOURISM =============
+  tourism = {
+    getEntries: (category) => {
+      const params = category ? `?category=${category}` : '';
+      return this.client.get(`/tourism/entries${params}`);
+    },
+
+    generateItinerary: (preferences) =>
+      this.client.post('/tourism/itinerary/generate', preferences, {
+        timeout: ITINERARY_TIMEOUT_MS,
+      }),
+
+    getSavedItineraries: () =>
+      this.client.get('/tourism/itinerary/saved'),
+  };
   // ============= INVITATIONS =============
   invitations = {
     send: (data) => this.client.post('/invitation', data),
