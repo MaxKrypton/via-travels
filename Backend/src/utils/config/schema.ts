@@ -337,7 +337,7 @@ export const helpArticles = pgTable('help_articles', {
 });
 */
 
-// Via Travels — Tourism Data
+
 export const tourismCategories = pgEnum('tourism_category', [
   'accommodation', 'attraction', 'activity', 'transport', 'permit'
 ]);
