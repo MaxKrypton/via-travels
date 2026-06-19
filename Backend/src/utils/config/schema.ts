@@ -350,6 +350,7 @@ export const tourismEntries = pgTable('tourism_entries', {
   location: varchar('location', { length: 255 }),
   priceRWF: integer('price_rwf').default(0),
   priceUSD: integer('price_usd').default(0),
+  pricingDetails: jsonb('pricing_details'),   // <-- add this line
   tags: text('tags').array(),
   bookingContact: varchar('booking_contact', { length: 100 }),
   lastVerified: timestamp('last_verified').defaultNow(),

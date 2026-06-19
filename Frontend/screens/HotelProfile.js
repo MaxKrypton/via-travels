@@ -216,7 +216,7 @@ const HotelProfile = () => {
                   <Text style={styles.ratingBarLabel}>Room</Text>
                   <Progress.Bar
                     progress={0.85}
-                    width={180}
+                    width={70}
                     height={8}
                     color="#1995AD"
                     unfilledColor="#E8F4F6"
@@ -229,7 +229,7 @@ const HotelProfile = () => {
                   <Text style={styles.ratingBarLabel}>Service</Text>
                   <Progress.Bar
                     progress={0.92}
-                    width={180}
+                    width={70}
                     height={8}
                     color="#1995AD"
                     unfilledColor="#E8F4F6"
@@ -242,7 +242,7 @@ const HotelProfile = () => {
                   <Text style={styles.ratingBarLabel}>Price</Text>
                   <Progress.Bar
                     progress={0.78}
-                    width={180}
+                    width={70}
                     height={8}
                     color="#1995AD"
                     unfilledColor="#E8F4F6"
