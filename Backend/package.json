@@ -14,7 +14,8 @@
     "validate": "npm run lint:fix",
     "dbGenerate": "drizzle-kit generate",
     "dbMigrate": "drizzle-kit push",
-    "seed:hotels": "node data_sql/run-seed.js",
+    "seed:hotels": "node scripts/data_sql/run-seed.js hotels-seed.sql",
+    "seed:ahaic": "node scripts/data_sql/run-seed.js ahaic-hotels.sql",
     "seed:tourism": "ts-node src/seed/run.ts"
   },
   "dependencies": {

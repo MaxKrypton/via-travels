@@ -108,7 +108,7 @@ const TopHotels = () => {
               height: 130,
               marginTop: -30,
               position: "absolute",
-              right: -20,
+              right: 0,
             }}
           />
         </View>

@@ -1,27 +1,3 @@
-/**
- * Via Travels — Tourism dataset seed, batch 3
- * -----------------------------------------------------------------------
- * Built from the original PDFs/pages this time (not summaries), so figures
- * here are read directly off the source documents. Where a source itself
- * looks dated or unverifiable, that is flagged in the entry's notes rather
- * than presented as current.
- *
- * Sources used in this batch:
- *  - RDB / Visit Rwanda booking portal — mountain gorilla tracking permit
- *      https://visitrwandabookings.rdb.rw/rdbportal/mountain-gorilla-tracking
- *  - Akagera Management Company — Pricing for Akagera National Park 2024 (PDF)
- *  - Nyungwe Management Company — Activities & Accommodation 2023-2024 (PDF)
- *  - RURA — City of Kigali Public Transport Tariff, effective 16 March 2024 (PDF)
- *  - RURA — Intercity Public Transport Tariff, effective 6 April 2026 (PDF)
- *  - "List of Hotels - Kigali" (PDF, undated — see staleness note below)
- *  - RDB — List of Graded Hotels 2022 (PDF, used only to cross-check which
- *      hotels are still officially graded/operating)
- *  - Rubavu Destination Tourist Map (RDB / Africa on Paper, PDF)
- *
- * Requires the 0001_add_pricing_details.sql migration (batch 2) to be
- * applied first.
- */
-
 import { database } from '../utils/config/database';
 import { tourismEntries } from '../utils/config/schema';
 
