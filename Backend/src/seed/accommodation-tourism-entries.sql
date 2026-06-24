@@ -1,0 +1,47 @@
+-- Add 40 verified hotels as accommodation entries in tourism_entries (the RAG dataset).
+-- Re-runnable: skips names already present.
+INSERT INTO tourism_entries (category, name, description, location, price_rwf, price_usd, tags, booking_contact)
+SELECT v.category::tourism_category, v.name, v.description, v.location, v.price_rwf, v.price_usd, v.tags, v.booking_contact
+FROM (VALUES
+  ('accommodation', 'Kigali Serena Hotel', '5-star luxury hotel in central Kigali (Nyarugenge), near the Belgian Peacekeepers Memorial.', 'Nyarugenge, Kigali', 0, 0, ARRAY['luxury','city','accommodation']::text[], 'kigalireservations@serena.co.rw'),
+  ('accommodation', 'Hôtel des Mille Collines', 'Historic 4-star hotel in the Kigali CBD, the real-life “Hotel Rwanda”, built 1973.', 'Nyarugenge, Kigali', 0, 0, ARRAY['upscale','city','accommodation']::text[], 'info@millecollines.net'),
+  ('accommodation', 'Hotel Chez Lando', 'Family-run 4-star hotel in bustling Remera, minutes from Kigali Convention Centre and the airport.', 'Gasabo, Kigali', 0, 0, ARRAY['upscale','city','accommodation']::text[], 'info@chezlando.com'),
+  ('accommodation', 'Wilderness Sabyinyo Silverback Lodge', 'Luxury community-owned gorilla-trekking lodge on the edge of Volcanoes NP at Kinigi.', 'Musanze, Kinigi', 0, 0, ARRAY['luxury','lodge','nature','gorilla-trekking','volcanoes-np','accommodation']::text[], 'info.wilderness_sabyinyo_silverback_lodge@viatravels.test'),
+  ('accommodation', 'Virunga Lodge', 'Iconic Afro-chic luxury lodge on a ridge overlooking the Twin Lakes and Virunga Volcanoes.', 'Burera', 0, 0, ARRAY['luxury','lodge','nature','gorilla-trekking','volcanoes-np','accommodation']::text[], 'info.virunga_lodge@viatravels.test'),
+  ('accommodation', 'Mountain Gorilla View Lodge', 'Eco-lodge of 30 stone-and-thatch cottages at Kinigi, on the rim of Volcanoes NP.', 'Musanze, Kinigi', 0, 0, ARRAY['upscale','lodge','nature','gorilla-trekking','volcanoes-np','accommodation']::text[], 'info@3bhotels.com'),
+  ('accommodation', 'Hotel Muhabura', 'Historic budget/mid-range town hotel in Musanze where Dian Fossey once stayed.', 'Musanze', 0, 0, ARRAY['mid-range','gorilla-trekking','volcanoes-np','accommodation']::text[], 'info.hotel_muhabura@viatravels.test'),
+  ('accommodation', 'La Palme Hotel', 'Small 3-star hotel in Musanze, about 10 km from Volcanoes National Park.', 'Musanze', 0, 0, ARRAY['mid-range','gorilla-trekking','volcanoes-np','accommodation']::text[], 'palmehotel02@yahoo.fr'),
+  ('accommodation', 'Virunga Hotel', 'Mid-range Musanze town hotel near the Musanze Modern Market, base for Volcanoes NP.', 'Musanze', 0, 0, ARRAY['mid-range','gorilla-trekking','volcanoes-np','accommodation']::text[], 'info@virungahotel.com'),
+  ('accommodation', 'Kinigi Guesthouse', 'Budget guesthouse at Kinigi, right by the Volcanoes NP trek departure point.', 'Musanze, Kinigi', 0, 0, ARRAY['budget','gorilla-trekking','volcanoes-np','accommodation']::text[], 'asoferwa@rwanda1.com'),
+  ('accommodation', 'Lake Kivu Serena Hotel', '4-star lakefront resort hotel on Lake Kivu in Gisenyi (formerly the Kivu Sun).', 'Rubavu, Gisenyi', 0, 0, ARRAY['upscale','lake-kivu','scenic','accommodation']::text[], 'info.lake_kivu_serena_hotel@viatravels.test'),
+  ('accommodation', 'Moriah Hill Resort', 'Lakeside resort on a peninsula on Lake Kivu, about 1 km from Karongi town.', 'Karongi, Kibuye', 0, 0, ARRAY['mid-range','lake-kivu','scenic','accommodation']::text[], 'moriah.hill@yahoo.com'),
+  ('accommodation', 'Home Saint Jean', 'Budget church-run guesthouse perched above Lake Kivu in Kibuye, with lake views.', 'Karongi, Kibuye', 0, 0, ARRAY['budget','lake-kivu','scenic','accommodation']::text[], 'info.home_saint_jean@viatravels.test'),
+  ('accommodation', 'Hotel Centre Bethanie', 'Budget lakeshore guesthouse directly on Lake Kivu in Kibuye, known for its restaurant terrace.', 'Karongi, Kibuye', 0, 0, ARRAY['budget','lake-kivu','scenic','accommodation']::text[], 'info.hotel_centre_bethanie@viatravels.test'),
+  ('accommodation', 'Hotel Ibis Huye', 'Landmark town hotel in Huye (Butare) since 1942, near the Ethnographic Museum.', 'Huye', 0, 0, ARRAY['mid-range','culture','museum-circuit','accommodation']::text[], 'campionibis@hotmail.com'),
+  ('accommodation', 'Hotel Faucon', 'Historic main-street hotel in Huye (Butare) with a restaurant and bar.', 'Huye', 0, 0, ARRAY['mid-range','culture','museum-circuit','accommodation']::text[], 'faucon@yahoo.fr'),
+  ('accommodation', 'Hotel Credo', 'Mid-range Huye (Butare) hotel with a swimming pool and restaurant.', 'Huye', 0, 0, ARRAY['mid-range','culture','museum-circuit','accommodation']::text[], 'credohotel@yahoo.fr'),
+  ('accommodation', 'Kigali Marriott Hotel', '5-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 290, ARRAY['luxury','city','accommodation']::text[], 'info.kigali_marriott_hotel@viatravels.test'),
+  ('accommodation', 'The Retreat by Heaven', '5-star boutique hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 0, ARRAY['luxury','city','boutique','accommodation']::text[], 'info.the_retreat_by_heaven@viatravels.test'),
+  ('accommodation', 'Heaven Restaurant & Boutique Hotel', '4-star boutique hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 0, ARRAY['upscale','city','boutique','accommodation']::text[], 'info.heaven_restaurant_boutique_hotel@viatravels.test'),
+  ('accommodation', 'Four Points by Sheraton Kigali', '4-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 210, ARRAY['upscale','city','accommodation']::text[], 'info.four_points_by_sheraton_kigali@viatravels.test'),
+  ('accommodation', 'Park Inn by Radisson Kigali', '4-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 180, ARRAY['upscale','city','accommodation']::text[], 'reservation.kigali@parkinn.com'),
+  ('accommodation', 'Ubumwe Grande Hotel', '4-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 0, ARRAY['upscale','city','accommodation']::text[], 'sales@ubumwegrandehotel.com'),
+  ('accommodation', 'M Hotel Kigali', '4-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 150, ARRAY['upscale','city','accommodation']::text[], 'reservation@mhotelkigali.com'),
+  ('accommodation', 'Lemigo Hotel', '4-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 135, ARRAY['upscale','city','accommodation']::text[], 'info@lemigohotel.com'),
+  ('accommodation', 'Mythos Hotel', '4-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['upscale','city','accommodation']::text[], 'sales@mythos.rw'),
+  ('accommodation', 'Grand Legacy Hotel', '4-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 120, ARRAY['upscale','city','accommodation']::text[], 'info.grand_legacy_hotel@viatravels.test'),
+  ('accommodation', '2000 Hotel Downtown', '4-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 100, ARRAY['upscale','city','accommodation']::text[], 'info.2000_hotel_downtown@viatravels.test'),
+  ('accommodation', 'Onomo Hotel Kigali', '3-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 110, ARRAY['mid-range','city','accommodation']::text[], 'sales.kigali@onomohotel.com'),
+  ('accommodation', 'Sainte Famille Hotel', '3-star hotel in Nyarugenge, Kigali.', 'Nyarugenge, Kigali', 0, 120, ARRAY['mid-range','city','accommodation']::text[], 'reservation@saintefamillehotel.com'),
+  ('accommodation', 'Elevate Suites Hotel', '3-star suites in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['mid-range','city','long-stay','accommodation']::text[], 'reservations@elevatesuiteskigali.com'),
+  ('accommodation', 'The Hut Restaurant and Boutique Hotel', '3-star boutique hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 185, ARRAY['mid-range','city','boutique','accommodation']::text[], 'info.the_hut_restaurant_and_boutique_hotel@viatravels.test'),
+  ('accommodation', 'Beausejour Hotel', '3-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['mid-range','city','accommodation']::text[], 'info@beausejourhotel.rw'),
+  ('accommodation', 'Grazia Apartment', '3-star apartment in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['mid-range','city','long-stay','accommodation']::text[], 'graziaparts@gmail.com'),
+  ('accommodation', 'Ndaru Luxury Suites', '3-star suites in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['mid-range','city','long-stay','accommodation']::text[], 'info.ndaru_luxury_suites@viatravels.test'),
+  ('accommodation', 'Home Free Hotel', '2-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['budget','city','accommodation']::text[], 'info.home_free_hotel@viatravels.test'),
+  ('accommodation', 'Centric Hotel', '2-star hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['budget','city','accommodation']::text[], 'info@centrichotel.rw'),
+  ('accommodation', 'Amata n’Ubuki Hotel', '3-star boutique hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 0, ARRAY['mid-range','city','boutique','accommodation']::text[], 'info@amatanubuki.com'),
+  ('accommodation', 'Touch Africa Residence', '4-star apartment in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 350, ARRAY['upscale','city','long-stay','accommodation']::text[], 'karamukaelsa841@gmail.com'),
+  ('accommodation', 'The Nest Boutique', '3-star boutique hotel in Gasabo, Kigali.', 'Gasabo, Kigali', 0, 86, ARRAY['mid-range','city','boutique','accommodation']::text[], 'v.uwitonze@thenestkigali.com')
+) AS v(category, name, description, location, price_rwf, price_usd, tags, booking_contact)
+WHERE v.name NOT IN (SELECT name FROM tourism_entries);

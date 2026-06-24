@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ActivityIndicator, View } from "react-native";
 
-// Existing screens
 import HomeScreen from "../screens/HomeScreen";
 import ExploreScreen from "../screens/ExploreScreen";
 import HotelProfile from "../screens/HotelProfile";
@@ -29,8 +28,6 @@ import PaymentScreen from "../screens/PaymentScreen";
 import BookingConfirmationScreen from "../selection/BookingConfirmationScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import AuthContext from "../context/AuthContext";
-
-// ── New Via Travels screens ──────────────────────────────────────────────────
 import ItineraryScreen from "../screens/ItineraryScreen";
 import AttractionsScreen from "../screens/AttractionsScreen";
 import SavedItinerariesScreen from "../screens/SavedItinerariesScreen";

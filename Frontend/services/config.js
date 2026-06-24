@@ -15,6 +15,9 @@ const getExpoHost = () => {
 const isLocalhostUrl = (value) =>
   value?.includes('://localhost') || value?.includes('://127.0.0.1');
 
+const isLanUrl = (value) =>
+  /^https?:\/\/(10\.|172\.(1[6-9]|2\d|3[0-1])\.|192\.168\.)/.test(value || '');
+
 const buildApiUrl = (host) => `http://${host}:8000/api/v1`;
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -33,7 +36,7 @@ const getDevelopmentApiUrl = () => {
 };
 
 const resolvedApiUrl =
-  configuredApiUrl && !isLocalhostUrl(configuredApiUrl)
+  configuredApiUrl && !isLocalhostUrl(configuredApiUrl) && !(__DEV__ && expoHost && isLanUrl(configuredApiUrl))
     ? configuredApiUrl
     : getDevelopmentApiUrl();
 
