@@ -47,4 +47,4 @@ export const API_BASE_URL = trimTrailingSlash(
 export const API_HOST = API_BASE_URL.replace(/^https?:\/\//, '').split('/')[0].split(':')[0];
 
 export const API_TIMEOUT_MS = Number(process.env.EXPO_PUBLIC_API_TIMEOUT_MS) || 15000;
-export const ITINERARY_TIMEOUT_MS = Number(process.env.EXPO_PUBLIC_ITINERARY_TIMEOUT_MS) || 120000;
+export const ITINERARY_TIMEOUT_MS = Number(process.env.EXPO_PUBLIC_ITINERARY_TIMEOUT_MS) || 300000;

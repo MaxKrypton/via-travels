@@ -18,6 +18,74 @@ class AuthenticationService {
     constructor() {
         this.repository = new User_1.AuthenticationRepository;
     }
+    wantsHtml(req) {
+        return req.method === 'GET' || req.accepts(['html', 'json']) === 'html';
+    }
+    verificationHtml(title, message, type) {
+        const accent = type === 'success' ? '#1995AD' : '#D64545';
+        const icon = type === 'success' ? '✓' : '!';
+        return `
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>${title}</title>
+          <style>
+            body {
+              margin: 0;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #F6F9FA;
+              color: #182527;
+              font-family: Arial, sans-serif;
+            }
+            .card {
+              width: min(90vw, 460px);
+              background: #FFFFFF;
+              border: 1px solid #E8EEF0;
+              border-radius: 12px;
+              padding: 32px 24px;
+              text-align: center;
+              box-shadow: 0 12px 30px rgba(16, 42, 48, 0.08);
+            }
+            .icon {
+              width: 56px;
+              height: 56px;
+              border-radius: 28px;
+              margin: 0 auto 18px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: ${accent};
+              color: #FFFFFF;
+              font-size: 30px;
+              font-weight: 800;
+            }
+            h1 {
+              margin: 0;
+              font-size: 24px;
+            }
+            p {
+              margin: 12px 0 0;
+              color: #5D6D72;
+              line-height: 1.55;
+              font-size: 15px;
+            }
+          </style>
+        </head>
+        <body>
+          <main class="card">
+            <div class="icon">${icon}</div>
+            <h1>${title}</h1>
+            <p>${message}</p>
+          </main>
+        </body>
+      </html>
+    `;
+    }
     // Register Service
     register(roles, req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -257,27 +325,42 @@ class AuthenticationService {
             try {
                 const payload = yield this.repository.verifyEmailToken(verifyToken);
                 if (!payload) {
+                    if (this.wantsHtml(req)) {
+                        return res.status(helpers_1.HttpStatusCodes.BAD_REQUEST).send(this.verificationHtml('Verification Link Expired', 'This email verification link is invalid or has expired. Please register again or contact support for a new link.', 'error'));
+                    }
                     return res.status(helpers_1.HttpStatusCodes.BAD_REQUEST).json({
                         message: 'Invalid or expired verification token.',
                     });
                 }
                 const user = yield this.repository.findUserByEmail(payload.email);
                 if (!user) {
+                    if (this.wantsHtml(req)) {
+                        return res.status(helpers_1.HttpStatusCodes.NOT_FOUND).send(this.verificationHtml('Account Not Found', 'We could not find an account for this verification link.', 'error'));
+                    }
                     return res.status(helpers_1.HttpStatusCodes.NOT_FOUND).json({
                         message: 'User not found.',
                     });
                 }
                 if (user.email_verified) {
+                    if (this.wantsHtml(req)) {
+                        return res.status(helpers_1.HttpStatusCodes.OK).send(this.verificationHtml('Email Already Verified', 'Your email address is already verified. You can return to the app and log in.', 'success'));
+                    }
                     return res.status(helpers_1.HttpStatusCodes.BAD_REQUEST).json({
                         message: 'This email is already verified.',
                     });
                 }
                 yield this.repository.markEmailAsVerified(payload.email);
+                if (this.wantsHtml(req)) {
+                    return res.status(helpers_1.HttpStatusCodes.OK).send(this.verificationHtml('Email Verified', 'Your email address has been verified successfully. You can now return to the app and log in.', 'success'));
+                }
                 return res.status(helpers_1.HttpStatusCodes.OK).json({
                     message: 'Email verified successfully. You can now log in.',
                 });
             }
             catch (error) {
+                if (this.wantsHtml(req)) {
+                    return res.status(helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR).send(this.verificationHtml('Verification Failed', 'Something went wrong while verifying your email. Please try again later.', 'error'));
+                }
                 return res.status(helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR).json(error);
             }
         });

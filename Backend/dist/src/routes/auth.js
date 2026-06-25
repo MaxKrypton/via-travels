@@ -68,6 +68,9 @@ Router.post('/forgot-password', (req, res) => __awaiter(void 0, void 0, void 0, 
 Router.post('/reset-password/:resetToken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     authService.resetPassword(req, res);
 }));
+Router.get('/verify-email/:verifyToken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    authService.verifyEmail(req, res);
+}));
 Router.post('/verify-email/:verifyToken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     authService.verifyEmail(req, res);
 }));

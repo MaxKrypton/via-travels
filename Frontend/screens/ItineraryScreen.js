@@ -153,14 +153,40 @@ export default function ItineraryScreen({ navigation }) {
 
   // ── Render itinerary result ──────────────────────────────────────────────
   if (showResult && itinerary) {
+    const tripSummary = [
+      {
+        icon: 'calendar-outline',
+        label: 'Dates',
+        value: getTravelDateLabel(),
+      },
+      {
+        icon: 'time-outline',
+        label: 'Duration',
+        value: `${getDurationDays()} ${getDurationDays() === 1 ? 'day' : 'days'}`,
+      },
+      {
+        icon: 'people-outline',
+        label: 'Group',
+        value: `${parseInt(groupSize) || 1} ${parseInt(groupSize) === 1 ? 'person' : 'people'}`,
+      },
+      {
+        icon: 'wallet-outline',
+        label: 'Budget',
+        value: budget.trim(),
+      },
+    ];
+
     return (
       <SafeAreaView style={styles.safe}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <StatusBar barStyle="dark-content" backgroundColor="#F6F9FA" />
         <View style={styles.resultHeader}>
           <TouchableOpacity onPress={handleReset} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="#1995AD" />
           </TouchableOpacity>
-          <Text style={styles.resultHeaderTitle}>Your Itinerary</Text>
+          <View style={styles.resultHeaderTitleWrap}>
+            <Text style={styles.resultHeaderTitle}>Your Itinerary</Text>
+            <Text style={styles.resultHeaderSub}>Rwanda trip plan</Text>
+          </View>
           <TouchableOpacity
             onPress={() => navigation.navigate('Saved Itineraries')}
             style={styles.savedBtn}
@@ -169,8 +195,54 @@ export default function ItineraryScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView ref={scrollRef} style={styles.resultScroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-          <ItineraryText text={itinerary} />
+        <ScrollView
+          ref={scrollRef}
+          style={styles.resultScroll}
+          contentContainerStyle={styles.resultContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.resultHero}>
+            <View style={styles.resultHeroIcon}>
+              <MaterialCommunityIcons name="map-marker-path" size={28} color="#FFFFFF" />
+            </View>
+            <Text style={styles.resultHeroTitle}>Trip plan ready</Text>
+            <Text style={styles.resultHeroText}>
+              Built from your dates, budget, group size, and selected interests.
+            </Text>
+          </View>
+
+          <View style={styles.summaryGrid}>
+            {tripSummary.map((item) => (
+              <View key={item.label} style={styles.summaryCard}>
+                <Ionicons name={item.icon} size={18} color="#1995AD" />
+                <View style={styles.summaryTextWrap}>
+                  <Text style={styles.summaryLabel}>{item.label}</Text>
+                  <Text style={styles.summaryValue} numberOfLines={2}>
+                    {item.value}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.interestStrip}>
+            {selectedInterests.map((interest) => (
+              <View key={interest} style={styles.resultInterestChip}>
+                <Text style={styles.resultInterestText}>{interest}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.itineraryCard}>
+            <View style={styles.itineraryCardHeader}>
+              <Text style={styles.itineraryCardTitle}>Detailed Schedule</Text>
+              <View style={styles.savedBadge}>
+                <Ionicons name="checkmark-circle" size={15} color="#1995AD" />
+                <Text style={styles.savedBadgeText}>Saved</Text>
+              </View>
+            </View>
+            <ItineraryText text={itinerary} />
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
@@ -322,47 +394,65 @@ const DateField = ({ label, value, placeholder, onPress }) => (
   </TouchableOpacity>
 );
 
+const cleanInlineMarkdown = (value) =>
+  value
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .trim();
+
 const ItineraryText = ({ text }) => {
   // Render markdown-ish text in a readable way
   const lines = text.split('\n');
   return (
-    <View>
+    <View style={styles.itineraryTextWrap}>
       {lines.map((line, i) => {
         const trimmed = line.trim();
-        if (!trimmed) return <View key={i} style={{ height: 6 }} />;
+        if (!trimmed) return <View key={i} style={styles.itSpacer} />;
 
         if (trimmed.startsWith('# ')) {
           return (
-            <Text key={i} style={styles.itH1}>
-              {trimmed.replace(/^# /, '')}
-            </Text>
+            <View key={i} style={styles.itTitleBlock}>
+              <Text style={styles.itH1}>{cleanInlineMarkdown(trimmed.replace(/^# /, ''))}</Text>
+            </View>
           );
         }
         if (trimmed.startsWith('## ')) {
+          const title = cleanInlineMarkdown(trimmed.replace(/^## /, ''));
+          const isDayHeading = /^day\s+\d+/i.test(title);
           return (
-            <Text key={i} style={styles.itH2}>
-              {trimmed.replace(/^## /, '')}
-            </Text>
+            <View key={i} style={[styles.itSectionHeader, isDayHeading && styles.itDayHeader]}>
+              <View style={[styles.itSectionIcon, isDayHeading && styles.itDayIcon]}>
+                <Ionicons
+                  name={isDayHeading ? 'sunny-outline' : 'navigate-outline'}
+                  size={16}
+                  color={isDayHeading ? '#FFFFFF' : '#1995AD'}
+                />
+              </View>
+              <Text style={[styles.itH2, isDayHeading && styles.itDayText]}>{title}</Text>
+            </View>
           );
         }
         if (trimmed.startsWith('### ')) {
           return (
-            <Text key={i} style={styles.itH3}>
-              {trimmed.replace(/^### /, '')}
-            </Text>
+            <View key={i} style={styles.itSubHeader}>
+              <View style={styles.itSubHeaderDot} />
+              <Text style={styles.itH3}>{cleanInlineMarkdown(trimmed.replace(/^### /, ''))}</Text>
+            </View>
           );
         }
         if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
           return (
             <Text key={i} style={styles.itBold}>
-              {trimmed.replace(/\*\*/g, '')}
+              {cleanInlineMarkdown(trimmed)}
             </Text>
           );
         }
         if (trimmed.startsWith('> ')) {
           return (
             <View key={i} style={styles.itQuote}>
-              <Text style={styles.itQuoteText}>{trimmed.replace(/^> /, '')}</Text>
+              <Ionicons name="information-circle-outline" size={17} color="#1995AD" />
+              <Text style={styles.itQuoteText}>{cleanInlineMarkdown(trimmed.replace(/^> /, ''))}</Text>
             </View>
           );
         }
@@ -370,28 +460,31 @@ const ItineraryText = ({ text }) => {
           return (
             <View key={i} style={styles.itBulletRow}>
               <Text style={styles.itBulletDot}>•</Text>
-              <Text style={styles.itBulletText}>{trimmed.replace(/^[-*] /, '')}</Text>
+              <Text style={styles.itBulletText}>{cleanInlineMarkdown(trimmed.replace(/^[-*] /, ''))}</Text>
             </View>
           );
         }
         if (trimmed.startsWith('---')) {
           return <View key={i} style={styles.itDivider} />;
         }
-        if (trimmed.startsWith('|')) {
-          // Table row — render as a simple text row
-          const cells = trimmed.split('|').filter(Boolean).map((c) => c.trim());
+          if (trimmed.startsWith('|')) {
+            // Table row — render as a simple text row
+          const cells = trimmed.split('|').filter(Boolean).map((c) => cleanInlineMarkdown(c));
           if (cells.every((c) => c.match(/^[-:]+$/))) return null; // skip separator row
+          const isHeader = i === 0 || lines[i - 1]?.trim().startsWith('|') === false;
           return (
-            <View key={i} style={styles.itTableRow}>
+            <View key={i} style={[styles.itTableRow, isHeader && styles.itTableHeaderRow]}>
               {cells.map((cell, j) => (
-                <Text key={j} style={styles.itTableCell}>{cell}</Text>
+                <Text key={j} style={[styles.itTableCell, isHeader && styles.itTableHeaderCell]}>
+                  {cell}
+                </Text>
               ))}
             </View>
           );
         }
         return (
           <Text key={i} style={styles.itBody}>
-            {trimmed}
+            {cleanInlineMarkdown(trimmed)}
           </Text>
         );
       })}
@@ -402,10 +495,10 @@ const ItineraryText = ({ text }) => {
 // ── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
+  safe: { flex: 1, backgroundColor: '#F6F9FA' },
 
   // Form
-  formContainer: { padding: 20, paddingBottom: 40 },
+  formContainer: { padding: 20, paddingBottom: 40, backgroundColor: '#FFFFFF' },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
   headerSub: { fontSize: 13, color: '#888', marginTop: 2 },
@@ -491,30 +584,219 @@ const styles = StyleSheet.create({
 
   // Result view
   resultHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#F6F9FA',
   },
-  backBtn: { padding: 4 },
-  savedBtn: { padding: 4 },
-  resultHeaderTitle: { fontSize: 17, fontWeight: '700', color: '#1a1a1a' },
-  resultScroll: { flex: 1 },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8EEF0',
+  },
+  savedBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8EEF0',
+  },
+  resultHeaderTitleWrap: { alignItems: 'center' },
+  resultHeaderTitle: { fontSize: 17, fontWeight: '800', color: '#182527' },
+  resultHeaderSub: { fontSize: 11, color: '#7C8B8F', marginTop: 2, fontWeight: '600' },
+  resultScroll: { flex: 1, backgroundColor: '#F6F9FA' },
+  resultContent: { padding: 16, paddingBottom: 40 },
+  resultHero: {
+    backgroundColor: '#143B43',
+    borderRadius: 8,
+    padding: 18,
+    marginBottom: 12,
+  },
+  resultHeroIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#1995AD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  resultHeroTitle: { color: '#FFFFFF', fontSize: 24, fontWeight: '900' },
+  resultHeroText: { color: '#DDEFF2', fontSize: 13, lineHeight: 20, marginTop: 6 },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 10,
+  },
+  summaryCard: {
+    width: '48.5%',
+    minHeight: 72,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E8EEF0',
+  },
+  summaryTextWrap: { flex: 1 },
+  summaryLabel: {
+    color: '#7C8B8F',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  summaryValue: { color: '#1B2B2F', fontSize: 13, fontWeight: '800', marginTop: 4, lineHeight: 18 },
+  interestStrip: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  resultInterestChip: {
+    backgroundColor: '#E8F7FA',
+    borderColor: '#B9E3EA',
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  resultInterestText: { color: '#137F91', fontSize: 12, fontWeight: '800' },
+  itineraryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E8EEF0',
+  },
+  itineraryCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    marginBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEF3F4',
+  },
+  itineraryCardTitle: { color: '#182527', fontSize: 16, fontWeight: '900' },
+  savedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E8F7FA',
+    borderRadius: 14,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  savedBadgeText: { color: '#137F91', fontSize: 11, fontWeight: '800' },
 
   // Itinerary text styles
-  itH1: { fontSize: 20, fontWeight: '800', color: '#1a1a1a', marginTop: 16, marginBottom: 6 },
-  itH2: { fontSize: 17, fontWeight: '700', color: '#1995AD', marginTop: 18, marginBottom: 4 },
-  itH3: { fontSize: 15, fontWeight: '700', color: '#333', marginTop: 12, marginBottom: 2 },
-  itBold: { fontSize: 14, fontWeight: '700', color: '#333', marginVertical: 3 },
-  itBody: { fontSize: 14, color: '#444', lineHeight: 22, marginVertical: 2 },
-  itQuote: {
-    borderLeftWidth: 3, borderLeftColor: '#1995AD',
-    paddingLeft: 12, marginVertical: 6, backgroundColor: '#f0fafc', borderRadius: 4, padding: 10,
+  itineraryTextWrap: { paddingTop: 4 },
+  itSpacer: { height: 8 },
+  itTitleBlock: {
+    backgroundColor: '#F4FAFB',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#D9EEF2',
   },
-  itQuoteText: { fontSize: 14, color: '#1995AD', fontStyle: 'italic', lineHeight: 20 },
-  itBulletRow: { flexDirection: 'row', marginVertical: 2, paddingLeft: 4 },
-  itBulletDot: { color: '#1995AD', fontSize: 16, marginRight: 8, lineHeight: 22 },
-  itBulletText: { flex: 1, fontSize: 14, color: '#444', lineHeight: 22 },
-  itDivider: { height: 1, backgroundColor: '#eee', marginVertical: 12 },
-  itTableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#eee', paddingVertical: 6 },
-  itTableCell: { flex: 1, fontSize: 12, color: '#444', paddingHorizontal: 4 },
+  itH1: { fontSize: 20, fontWeight: '900', color: '#102A30', lineHeight: 26 },
+  itSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    marginTop: 18,
+    marginBottom: 8,
+  },
+  itDayHeader: {
+    backgroundColor: '#1995AD',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  itSectionIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#E8F7FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itDayIcon: { backgroundColor: 'rgba(255,255,255,0.22)' },
+  itH2: { flex: 1, fontSize: 17, fontWeight: '900', color: '#137F91', lineHeight: 22 },
+  itDayText: { color: '#FFFFFF' },
+  itSubHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  itSubHeaderDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#1995AD',
+  },
+  itH3: { flex: 1, fontSize: 15, fontWeight: '800', color: '#22383D', lineHeight: 20 },
+  itBold: { fontSize: 14, fontWeight: '800', color: '#22383D', marginVertical: 5, lineHeight: 20 },
+  itBody: { fontSize: 14, color: '#415256', lineHeight: 22, marginVertical: 3 },
+  itQuote: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'flex-start',
+    borderLeftWidth: 3,
+    borderLeftColor: '#1995AD',
+    paddingLeft: 12,
+    marginVertical: 8,
+    backgroundColor: '#F0FAFC',
+    borderRadius: 8,
+    padding: 10,
+  },
+  itQuoteText: { flex: 1, fontSize: 14, color: '#137F91', lineHeight: 20, fontWeight: '600' },
+  itBulletRow: {
+    flexDirection: 'row',
+    marginVertical: 3,
+    paddingLeft: 2,
+    paddingRight: 4,
+  },
+  itBulletDot: { color: '#1995AD', fontSize: 16, marginRight: 9, lineHeight: 22 },
+  itBulletText: { flex: 1, fontSize: 14, color: '#415256', lineHeight: 22 },
+  itDivider: { height: 1, backgroundColor: '#E4ECEE', marginVertical: 14 },
+  itTableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8EEF0',
+    backgroundColor: '#FFFFFF',
+  },
+  itTableHeaderRow: {
+    backgroundColor: '#F4FAFB',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E8EEF0',
+  },
+  itTableCell: {
+    flex: 1,
+    fontSize: 12,
+    color: '#415256',
+    paddingHorizontal: 7,
+    paddingVertical: 9,
+    lineHeight: 16,
+  },
+  itTableHeaderCell: { color: '#102A30', fontWeight: '900' },
 });

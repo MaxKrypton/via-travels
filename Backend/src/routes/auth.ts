@@ -28,6 +28,10 @@ Router.post('/reset-password/:resetToken', async (req: Request, res: Response) =
   authService.resetPassword(req, res);
 });
 
+Router.get('/verify-email/:verifyToken', async (req: Request, res: Response) => {
+  authService.verifyEmail(req, res);
+});
+
 Router.post('/verify-email/:verifyToken', async (req: Request, res: Response) => {
   authService.verifyEmail(req, res);
 });

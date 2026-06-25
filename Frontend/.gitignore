@@ -35,8 +35,7 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# assets
-assets
-
 # env
 .env
+
+assets/

@@ -26,7 +26,7 @@ const SignUpScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
-  const { setUser, setSignedIn, setAuthStatus, saveAuthStatus, saveUserDetails, ip } = useContext(AuthContext);
+  const { setSignedIn, ip } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = async () => {
@@ -82,8 +82,6 @@ const SignUpScreen = () => {
 
         // Update context to show not verified status
         setSignedIn(false);
-        setAuthStatus("notVerified");
-        await saveAuthStatus("isLoggedIn", "notVerified");
 
       } else {
         Alert.alert("Registration Failed", result.message || "Please try again");

@@ -298,7 +298,6 @@ export const helpArticles = pgTable('help_articles', {
   updated_at: timestamp('updated_at').defaultNow().notNull()
 });
 */
-// Via Travels — Tourism Data
 exports.tourismCategories = (0, pg_core_1.pgEnum)('tourism_category', [
     'accommodation', 'attraction', 'activity', 'transport', 'permit'
 ]);
@@ -310,6 +309,7 @@ exports.tourismEntries = (0, pg_core_1.pgTable)('tourism_entries', {
     location: (0, pg_core_1.varchar)('location', { length: 255 }),
     priceRWF: (0, pg_core_1.integer)('price_rwf').default(0),
     priceUSD: (0, pg_core_1.integer)('price_usd').default(0),
+    pricingDetails: (0, pg_core_1.jsonb)('pricing_details'), // <-- add this line
     tags: (0, pg_core_1.text)('tags').array(),
     bookingContact: (0, pg_core_1.varchar)('booking_contact', { length: 100 }),
     lastVerified: (0, pg_core_1.timestamp)('last_verified').defaultNow(),
