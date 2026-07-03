@@ -5,11 +5,9 @@ import {
   FlatList,
   Pressable,
   useWindowDimensions,
-  Image,
   StatusBar,
   ActivityIndicator,
   TouchableOpacity,
-  Animated,
 } from "react-native";
 import { Video, ResizeMode, Audio } from "expo-av";
 import { useCallback, useState, useRef, useEffect, memo, useContext } from "react";
@@ -17,42 +15,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from 'expo-blur';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import axios from "axios";
 import AuthContext from "../context/AuthContext";
-
-// Animated Like Button Component
-const AnimatedLikeButton = ({ isLiked, onPress, likesCount }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const handlePress = () => {
-    Animated.sequence([
-      Animated.spring(scaleAnim, {
-        toValue: 1.3,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    onPress();
-  };
-
-  return (
-    <TouchableOpacity style={styles.sidebarItem} onPress={handlePress}>
-      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-        <MaterialIcons
-          name={isLiked ? "favorite" : "favorite-border"}
-          size={32}
-          color={isLiked ? "#FF3B30" : "white"}
-        />
-      </Animated.View>
-      <Text style={styles.iconText}>{likesCount || 0}</Text>
-    </TouchableOpacity>
-  );
-};
 
 // Memoized Video Item Component
 const VideoItem = memo(({
@@ -63,11 +28,7 @@ const VideoItem = memo(({
   videoRef,
   onPress,
   isActive,
-  onLike,
-  onSave,
   onBook,
-  isLiked,
-  isSaved
 }) => {
   return (
     <View style={{ width, height }}>
@@ -102,78 +63,14 @@ const VideoItem = memo(({
             </BlurView>
           </View>
 
-          {/* Right sidebar with actions */}
-          <View style={styles.sidebar}>
-            {/* Like Button */}
-            <AnimatedLikeButton
-              isLiked={isLiked}
-              onPress={() => onLike(item.id)}
-              likesCount={item.likes_count}
-            />
-
-            {/* Comment Button */}
-            <TouchableOpacity style={styles.sidebarItem}>
-              <Ionicons name="chatbubble-outline" size={30} color="white" />
-              <Text style={styles.iconText}>
-                {item.comments_count || 0}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Save Button */}
-            <TouchableOpacity style={styles.sidebarItem} onPress={() => onSave(item.id)}>
-              <MaterialIcons
-                name={isSaved ? "bookmark" : "bookmark-border"}
-                size={32}
-                color={isSaved ? "#FFD700" : "white"}
-              />
-            </TouchableOpacity>
-
-            {/* Share Button */}
-            <TouchableOpacity style={styles.sidebarItem}>
-              <Feather name="share-2" size={28} color="white" />
-            </TouchableOpacity>
-
-            {/* Hotel Logo */}
-            <View style={styles.hotelLogoContainer}>
-              <Image
-                source={
-                  item.hotel?.logo_url
-                    ? { uri: item.hotel.logo_url }
-                    : require("../assets/images/profile.webp")
-                }
-                style={styles.sidebarHotelLogo}
-              />
-            </View>
-          </View>
-
           {/* Bottom content info */}
           <View style={styles.contentContainer}>
             <View style={styles.userInfoContainer}>
               {/* Hotel Info Row */}
               <View style={styles.hotelInfoRow}>
-                <View style={styles.profileContainer}>
-                  <Image
-                    source={
-                      item.hotel?.logo_url
-                        ? { uri: item.hotel.logo_url }
-                        : require("../assets/images/profile.webp")
-                    }
-                    style={styles.profileImage}
-                  />
-                  <View style={styles.nameContainer}>
-                    <Text style={styles.nameText}>
-                      {item.hotel?.name || item.hotel_name || "Hotel"}
-                    </Text>
-                    {item.hotel?.location && (
-                      <View style={styles.locationRow}>
-                        <MaterialIcons name="location-on" size={12} color="white" />
-                        <Text style={styles.locationText}>
-                          {item.hotel.location}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
+                <Text style={styles.nameText} numberOfLines={1}>
+                  {item.hotel?.name || item.hotel_name || "Hotel"}
+                </Text>
                 
                 {/* Book Button */}
                 <TouchableOpacity
@@ -191,23 +88,6 @@ const VideoItem = memo(({
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
-
-              {/* Caption/Description */}
-              {item.caption || item.description ? (
-                <Text style={styles.captionText} numberOfLines={2}>
-                  {item.caption || item.description}
-                </Text>
-              ) : null}
-
-              {/* Music info */}
-              <View style={styles.musicContainer}>
-                <View style={styles.musicDisc}>
-                  <Feather name="music" size={12} color="white" />
-                </View>
-                <Text style={styles.musicText} numberOfLines={1}>
-                  {item.audio_title || "Original Audio"}
-                </Text>
-              </View>
             </View>
           </View>
         </LinearGradient>
@@ -219,24 +99,27 @@ const VideoItem = memo(({
     prevProps.isActive === nextProps.isActive &&
     prevProps.width === nextProps.width &&
     prevProps.height === nextProps.height &&
-    prevProps.item.id === nextProps.item.id &&
-    prevProps.isLiked === nextProps.isLiked &&
-    prevProps.isSaved === nextProps.isSaved
+    prevProps.item.id === nextProps.item.id
   );
 });
 
 const VideoScroll = () => {
-  const { width, height } = useWindowDimensions();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const videoRefs = useRef([]);
+  const [feedSize, setFeedSize] = useState({
+    width: windowWidth,
+    height: windowHeight,
+  });
   const [activePostId, setActivePostId] = useState(null);
   const [videoFeed, setVideoFeed] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [likedVideos, setLikedVideos] = useState(new Set());
-  const [savedVideos, setSavedVideos] = useState(new Set());
-  const { ip, authToken, setCurrentID } = useContext(AuthContext);
+  const { ip, setCurrentID } = useContext(AuthContext);
+
+  const itemWidth = feedSize.width || windowWidth;
+  const itemHeight = feedSize.height || windowHeight;
 
   useEffect(() => {
     const setupAudio = async () => {
@@ -326,46 +209,6 @@ const VideoScroll = () => {
     });
   }, []);
 
-  const handleLike = useCallback(async (videoId) => {
-    const isLiked = likedVideos.has(videoId);
-
-    setLikedVideos(prev => {
-      const newSet = new Set(prev);
-      if (isLiked) {
-        newSet.delete(videoId);
-      } else {
-        newSet.add(videoId);
-      }
-      return newSet;
-    });
-
-    setVideoFeed(prev => prev.map(video => {
-      if (video.id === videoId) {
-        return {
-          ...video,
-          likes_count: isLiked
-            ? Math.max(0, (video.likes_count || 1) - 1)
-            : (video.likes_count || 0) + 1
-        };
-      }
-      return video;
-    }));
-  }, [likedVideos]);
-
-  const handleSave = useCallback(async (videoId) => {
-    const isSaved = savedVideos.has(videoId);
-
-    setSavedVideos(prev => {
-      const newSet = new Set(prev);
-      if (isSaved) {
-        newSet.delete(videoId);
-      } else {
-        newSet.add(videoId);
-      }
-      return newSet;
-    });
-  }, [savedVideos]);
-
   const handleBook = useCallback((hotelId) => {
     if (!hotelId) {
       console.log("Hotel ID not available");
@@ -381,6 +224,20 @@ const VideoScroll = () => {
       params: { hotelId }
     });
   }, [navigation, setCurrentID]);
+
+  const handleContainerLayout = useCallback((event) => {
+    const { width, height } = event.nativeEvent.layout;
+
+    if (!width || !height) return;
+
+    setFeedSize((currentSize) => {
+      if (currentSize.width === width && currentSize.height === height) {
+        return currentSize;
+      }
+
+      return { width, height };
+    });
+  }, []);
 
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0 && videoFeed.length > 0) {
@@ -410,18 +267,14 @@ const VideoScroll = () => {
     <VideoItem
       item={item}
       index={index}
-      width={width}
-      height={height}
+      width={itemWidth}
+      height={itemHeight}
       videoRef={(ref) => (videoRefs.current[index] = ref)}
       onPress={onPress}
       isActive={item.id === activePostId && isFocused}
-      onLike={handleLike}
-      onSave={handleSave}
       onBook={handleBook}
-      isLiked={likedVideos.has(item.id)}
-      isSaved={savedVideos.has(item.id)}
     />
-  ), [width, height, activePostId, isFocused, onPress, handleLike, handleSave, handleBook, likedVideos, savedVideos]);
+  ), [itemWidth, itemHeight, activePostId, isFocused, onPress, handleBook]);
 
   const keyExtractor = useCallback((item) => item.id.toString(), []);
 
@@ -481,8 +334,9 @@ const VideoScroll = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={handleContainerLayout}>
       <FlatList
+        key={`${itemWidth}x${itemHeight}`}
         vertical
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -495,7 +349,12 @@ const VideoScroll = () => {
         maxToRenderPerBatch={2}
         windowSize={3}
         initialNumToRender={1}
-        snapToInterval={height}
+        snapToInterval={itemHeight}
+        getItemLayout={(_, index) => ({
+          length: itemHeight,
+          offset: itemHeight * index,
+          index,
+        })}
         decelerationRate="fast"
       />
     </View>
@@ -593,35 +452,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sidebar: {
-    position: 'absolute',
-    right: 12,
-    bottom: 140,
-    alignItems: 'center',
-  },
-  sidebarItem: {
-    alignItems: 'center',
-    marginVertical: 14,
-  },
-  iconText: {
-    color: 'white',
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '700',
-  },
-  hotelLogoContainer: {
-    marginTop: 16,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: 'white',
-    overflow: 'hidden',
-  },
-  sidebarHotelLogo: {
-    width: '100%',
-    height: '100%',
-  },
   contentContainer: {
     paddingHorizontal: 16,
     paddingBottom: 32,
@@ -633,38 +463,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  profileContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  profileImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  nameContainer: {
-    marginLeft: 12,
-    flex: 1,
+    gap: 16,
   },
   nameText: {
     color: "white",
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 2,
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationText: {
-    color: 'white',
-    fontSize: 12,
-    marginLeft: 4,
-    opacity: 0.9,
+    flex: 1,
   },
   bookButton: {
     borderRadius: 22,
@@ -686,36 +492,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '700',
-  },
-  captionText: {
-    color: "white",
-    fontSize: 14,
-    fontWeight: "400",
-    lineHeight: 20,
-  },
-  musicContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  musicDisc: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  musicText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: '600',
-    maxWidth: 200,
   },
 });
 

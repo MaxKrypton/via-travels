@@ -212,11 +212,11 @@ const SponsoredPost = ({ posts }) => {
             {item.postDescription}
           </Text>
 
-          {/* Rating */}
+          {/* Rating
           <View style={styles.ratingContainer}>
             <FontAwesome name="star" size={20} color="#F9A825" />
             <Text style={styles.ratingText}>{item.avg_rating} Rating</Text>
-          </View>
+          </View> */}
 
           {/* Price and Action */}
           <View style={styles.priceActionContainer}>

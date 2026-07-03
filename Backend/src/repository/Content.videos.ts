@@ -3,7 +3,7 @@ import { HttpStatusCodes } from "../utils/helpers";
 import { database } from "../utils/config/database";
 import { DataResponse } from "../utils/types";
 import { MulterRequest } from "../utils/config/multer";
-import { videos, videoLikes, videoSaves } from '../utils/config/schema';
+import { hotels, videos, videoLikes, videoSaves } from '../utils/config/schema';
 import { eq, and } from "drizzle-orm";
 import fileUpload from "./File.upload";
 import { sql } from "drizzle-orm";
@@ -132,8 +132,26 @@ class VideoRepo {
   async getAllVideos(req: Request, res: Response): Promise<DataResponse> {
     try {
       const videosData = await database
-        .select()
+        .select({
+          id: videos.id,
+          hotel_id: videos.hotel_id,
+          title: videos.title,
+          video_url: videos.video_url,
+          thumbnail_url: videos.thumbnail_url,
+          thumbnail: videos.thumbnail_url,
+          view_count: videos.view_count,
+          created_at: videos.created_at,
+          updated_at: videos.updated_at,
+          hotel_name: hotels.name,
+          hotel: {
+            id: hotels.id,
+            name: hotels.name,
+            location: hotels.city,
+          },
+        })
         .from(videos)
+        .leftJoin(hotels, eq(videos.hotel_id, hotels.id))
+        .orderBy(sql`random()`)
       return {
         data: videosData,
         status: HttpStatusCodes.OK,

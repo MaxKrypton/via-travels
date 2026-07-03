@@ -16,6 +16,8 @@
     "dbMigrate": "drizzle-kit push",
     "seed:hotels": "node scripts/data_sql/run-seed.js hotels-seed.sql",
     "seed:ahaic": "node scripts/data_sql/run-seed.js ahaic-hotels.sql",
+    "seed:reels": "ts-node scripts/seed-reels-to-hotels.ts",
+    "seed:rooms": "ts-node scripts/seed-hotel-rooms.ts",
     "seed:tourism": "ts-node src/seed/run.ts"
   },
   "dependencies": {

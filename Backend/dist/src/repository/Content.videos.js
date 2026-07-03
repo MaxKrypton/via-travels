@@ -128,8 +128,26 @@ class VideoRepo {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const videosData = yield database_1.database
-                    .select()
-                    .from(schema_1.videos);
+                    .select({
+                    id: schema_1.videos.id,
+                    hotel_id: schema_1.videos.hotel_id,
+                    title: schema_1.videos.title,
+                    video_url: schema_1.videos.video_url,
+                    thumbnail_url: schema_1.videos.thumbnail_url,
+                    thumbnail: schema_1.videos.thumbnail_url,
+                    view_count: schema_1.videos.view_count,
+                    created_at: schema_1.videos.created_at,
+                    updated_at: schema_1.videos.updated_at,
+                    hotel_name: schema_1.hotels.name,
+                    hotel: {
+                        id: schema_1.hotels.id,
+                        name: schema_1.hotels.name,
+                        location: schema_1.hotels.city,
+                    },
+                })
+                    .from(schema_1.videos)
+                    .leftJoin(schema_1.hotels, (0, drizzle_orm_1.eq)(schema_1.videos.hotel_id, schema_1.hotels.id))
+                    .orderBy((0, drizzle_orm_2.sql) `random()`);
                 return {
                     data: videosData,
                     status: helpers_1.HttpStatusCodes.OK,
