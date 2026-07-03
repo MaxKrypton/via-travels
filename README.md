@@ -4,8 +4,13 @@ Via Travels is a Rwanda travel and hotel booking mobile app. It includes a React
 
 Repository: https://github.com/MaxKrypton/via-travels
 
+## Demo Video
+
+Watch the Via Travels demo here: https://youtu.be/Evl1dWp0OTw
+
 ## Table Of Contents
 
+- [Demo Video](#demo-video)
 - [Project Structure](#project-structure)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
