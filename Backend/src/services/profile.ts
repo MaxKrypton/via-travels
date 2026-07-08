@@ -53,6 +53,37 @@ class ProfileService {
     }
   }
 
+  async upsertMyProfile(req: MulterRequest, res: Response): Promise<Response> {
+    try {
+      const profileData: updateProfileDataTypes = req.body;
+      const { data, status, message } = await profileRepository.upsertMyProfile(req as MulterRequest, res, profileData);
+
+      return res.status(status).json({
+        message,
+        data
+      });
+    } catch (error) {
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: `Server error, ${error}`
+      })
+    }
+  }
+
+  async getMyProfile(req: Request, res: Response): Promise<Response> {
+    try {
+      const { data, status, message } = await profileRepository.getMyProfile(req, res);
+
+      return res.status(status).json({
+        message,
+        data
+      });
+    } catch (error) {
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: `Server error, ${error}`
+      })
+    }
+  }
+
   async getSpecificProfile(req: Request, res: Response): Promise<Response> {
     try {
       // send the data to profile Repository

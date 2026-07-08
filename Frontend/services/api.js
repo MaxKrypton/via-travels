@@ -80,10 +80,16 @@ class ApiService {
   // ============= PROFILE =============
   profile = {
     getAllProfiles: () => this.client.get('/profile/all-profiles'),
+
+    getMe: () => this.client.get('/profile/me'),
     
     getProfile: (profileId) => this.client.get(`/profile/${profileId}`),
     
     register: (data) => this.client.post('/profile/register', data),
+
+    updateMe: (data) => this.client.patch('/profile/me', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
     
     update: (profileId, data) => this.client.patch(`/profile/update/${profileId}`, data),
     

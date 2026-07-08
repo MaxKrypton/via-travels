@@ -11,6 +11,11 @@ ProfileRoute.get('/all-profiles', authMiddleware, (req: Request, res: Response) 
   return profileService.getAllProfile(req, res);
 });
 
+// get current user's profile
+ProfileRoute.get('/me', authMiddleware, (req: Request, res: Response) => {
+  return profileService.getMyProfile(req, res);
+});
+
 // get a specific user profile
 ProfileRoute.get('/:profileId', authMiddleware, (req: Request, res: Response) => {
   return profileService.getSpecificProfile(req, res);
@@ -26,6 +31,14 @@ ProfileRoute.post('/register', authMiddleware, upload.single('profilePicture'), 
 });
 
 // Update a user Profile
+ProfileRoute.patch('/me', authMiddleware, upload.single('profilePicture'), contentAwareImageMiddleware({
+  maxWidth: 500,
+  maxHeight: 500,
+  quality: 85
+}), (req: Request, res: Response) => {
+  return profileService.upsertMyProfile(req as MulterRequest, res);
+});
+
 ProfileRoute.patch('/update/:profileId', authMiddleware, upload.single('profilePicture'), contentAwareImageMiddleware({
   maxWidth: 500,
   maxHeight: 500,

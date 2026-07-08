@@ -13,8 +13,10 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import apiService from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 
 const RoomAvailabilityChecker = ({ roomTypeId, onAvailabilityChecked }) => {
+  const { formatPrice } = useCurrency();
   const [checkInDate, setCheckInDate] = useState(new Date());
   const [checkOutDate, setCheckOutDate] = useState(
     new Date(Date.now() + 86400000) // Tomorrow
@@ -83,7 +85,7 @@ const RoomAvailabilityChecker = ({ roomTypeId, onAvailabilityChecked }) => {
       if (result.data?.available) {
         Alert.alert(
           'Available! ✓',
-          `${result.data.available_rooms} room(s) available\nTotal: ${result.data.currency} ${result.data.total_price}`,
+          `${result.data.available_rooms} room(s) available\nTotal: ${formatPrice(result.data.total_price, result.data.currency || 'RWF')}`,
           [{ text: 'OK' }]
         );
       } else {
@@ -172,15 +174,13 @@ const RoomAvailabilityChecker = ({ roomTypeId, onAvailabilityChecked }) => {
             <View style={styles.resultRow}>
               <Text style={styles.resultLabel}>Price per Night:</Text>
               <Text style={styles.resultValue}>
-                {availabilityResult.data.currency}{' '}
-                {availabilityResult.data.price_per_night}
+                {formatPrice(availabilityResult.data.price_per_night, availabilityResult.data.currency || 'RWF')}
               </Text>
             </View>
             <View style={[styles.resultRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total Price:</Text>
               <Text style={styles.totalValue}>
-                {availabilityResult.data.currency}{' '}
-                {availabilityResult.data.total_price}
+                {formatPrice(availabilityResult.data.total_price, availabilityResult.data.currency || 'RWF')}
               </Text>
             </View>
           </View>

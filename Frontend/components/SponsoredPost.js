@@ -5,12 +5,14 @@ import { useNavigation } from "@react-navigation/native";
 import AuthContext from "../context/AuthContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
+import { useCurrency } from "../context/CurrencyContext";
 
 const { width } = Dimensions.get("window");
 
 const SponsoredPost = ({ posts }) => {
   const navigation = useNavigation();
   const { setCurrentID } = useContext(AuthContext);
+  const { formatPrice } = useCurrency();
   const [expandedPost, setExpandedPost] = useState(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   
@@ -133,7 +135,9 @@ const SponsoredPost = ({ posts }) => {
                 <View style={styles.expandedPriceActionContainer}>
                   <View style={styles.expandedPriceContainer}>
                     <Text style={styles.expandedPriceLabel}>Start from</Text>
-                    <Text style={styles.expandedPriceValue}>{expandedPost.currency} {expandedPost.base_price}/per night</Text>
+                    <Text style={styles.expandedPriceValue}>
+                      {formatPrice(expandedPost.base_price || 0, expandedPost.currency || 'RWF')}/per night
+                    </Text>
                   </View>
                   
                   <TouchableOpacity 
@@ -222,7 +226,9 @@ const SponsoredPost = ({ posts }) => {
           <View style={styles.priceActionContainer}>
             <View style={styles.priceContainer}>
               <Text style={styles.priceLabel}>Start from</Text>
-              <Text style={styles.priceValue}>{item.currency} {item.base_price}/per night</Text>
+              <Text style={styles.priceValue}>
+                {formatPrice(item.base_price || 0, item.currency || 'RWF')}/per night
+              </Text>
             </View>
             
             <TouchableOpacity 

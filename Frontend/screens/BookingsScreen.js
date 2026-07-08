@@ -17,12 +17,14 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import apiService from '../services/api';
 import AuthContext from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const BookingsScreen = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { userId } = useContext(AuthContext);
+  const { formatPrice } = useCurrency();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -146,7 +148,7 @@ const BookingsScreen = () => {
           <MaterialIcons name="attach-money" size={18} color="#666" />
           <Text style={styles.detailLabel}>Total:</Text>
           <Text style={styles.priceValue}>
-            {item.currency} {parseFloat(item.total_price).toFixed(2)}
+            {formatPrice(item.total_price, item.currency || 'RWF')}
           </Text>
         </View>
       </View>

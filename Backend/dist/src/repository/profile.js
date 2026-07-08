@@ -19,6 +19,62 @@ const schema_1 = require("../utils/config/schema");
 const drizzle_orm_1 = require("drizzle-orm");
 const File_upload_1 = __importDefault(require("./File.upload"));
 class profileRepo {
+    uploadProfilePicture(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!req.file)
+                return undefined;
+            const profilePictureURL = yield File_upload_1.default.uploadFileToS3(req.file);
+            if (typeof profilePictureURL !== 'string') {
+                throw new Error("Failed to upload profile picture");
+            }
+            return profilePictureURL;
+        });
+    }
+    buildProfileUpdateData(profileData, avatarUrl) {
+        const data = {};
+        if (profileData.first_name !== undefined)
+            data.first_name = profileData.first_name;
+        if (profileData.last_name !== undefined)
+            data.last_name = profileData.last_name;
+        if (profileData.phone_number !== undefined)
+            data.phone_number = profileData.phone_number;
+        if (profileData.date_of_birth !== undefined)
+            data.date_of_birth = profileData.date_of_birth;
+        if (profileData.preferred_language !== undefined)
+            data.preferred_language = profileData.preferred_language;
+        if (profileData.preferred_currency !== undefined)
+            data.preferred_currency = profileData.preferred_currency;
+        if (avatarUrl !== undefined)
+            data.avatar_url = avatarUrl;
+        if (profileData.avatar_url !== undefined && avatarUrl === undefined)
+            data.avatar_url = profileData.avatar_url;
+        data.updated_at = new Date();
+        return data;
+    }
+    profileSelectFields() {
+        return {
+            userId: schema_1.userTable.id,
+            profileId: schema_1.userProfiles.id,
+            username: schema_1.userTable.username,
+            email: schema_1.userTable.email,
+            first_name: schema_1.userProfiles.first_name,
+            last_name: schema_1.userProfiles.last_name,
+            phone_number: schema_1.userProfiles.phone_number,
+            date_of_birth: schema_1.userProfiles.date_of_birth,
+            avatar_url: schema_1.userProfiles.avatar_url,
+            preferred_language: schema_1.userProfiles.preferred_language,
+            preferred_currency: schema_1.userProfiles.preferred_currency,
+            firstName: schema_1.userProfiles.first_name,
+            lastName: schema_1.userProfiles.last_name,
+            phoneNumber: schema_1.userProfiles.phone_number,
+            dateOfBirth: schema_1.userProfiles.date_of_birth,
+            avatarUrl: schema_1.userProfiles.avatar_url,
+            preferredLanguage: schema_1.userProfiles.preferred_language,
+            preferredCurrency: schema_1.userProfiles.preferred_currency,
+            createdAt: schema_1.userProfiles.created_at,
+            updatedAt: schema_1.userProfiles.updated_at
+        };
+    }
     checkExistingProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
@@ -100,15 +156,8 @@ class profileRepo {
         return __awaiter(this, void 0, void 0, function* () {
             const profile_id = req.params.profileId;
             try {
-                const data = {
-                    first_name: profileData.first_name,
-                    last_name: profileData.last_name,
-                    phone_number: profileData.phone_number,
-                    date_of_birth: profileData.date_of_birth,
-                    avatar_url: profileData.avatar_url,
-                    preferred_language: profileData.preferred_language,
-                    preferred_currency: profileData.preferred_currency
-                };
+                const uploadedAvatarUrl = yield this.uploadProfilePicture(req);
+                const data = this.buildProfileUpdateData(profileData, uploadedAvatarUrl);
                 const updatedProfile = yield database_1.database
                     .update(schema_1.userProfiles)
                     .set(data)
@@ -119,6 +168,99 @@ class profileRepo {
                     data: updatedProfile,
                     status: helpers_1.HttpStatusCodes.CREATED,
                     message: "User Profile Updated Successfully"
+                };
+            }
+            catch (error) {
+                return {
+                    data: '',
+                    message: error,
+                    status: helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR
+                };
+            }
+        });
+    }
+    upsertMyProfile(req, res, profileData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const user_ID = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            if (!user_ID) {
+                return {
+                    data: '',
+                    message: "User not authenticated",
+                    status: helpers_1.HttpStatusCodes.UNAUTHORIZED
+                };
+            }
+            try {
+                const uploadedAvatarUrl = yield this.uploadProfilePicture(req);
+                const [existingProfile] = yield database_1.database
+                    .select()
+                    .from(schema_1.userProfiles)
+                    .where((0, drizzle_orm_1.eq)(schema_1.userProfiles.user_id, user_ID))
+                    .limit(1);
+                if (existingProfile) {
+                    const data = this.buildProfileUpdateData(profileData, uploadedAvatarUrl);
+                    const [updatedProfile] = yield database_1.database
+                        .update(schema_1.userProfiles)
+                        .set(data)
+                        .where((0, drizzle_orm_1.eq)(schema_1.userProfiles.id, existingProfile.id))
+                        .returning();
+                    return {
+                        data: updatedProfile,
+                        status: helpers_1.HttpStatusCodes.OK,
+                        message: "User Profile Updated Successfully"
+                    };
+                }
+                const data = {
+                    user_id: user_ID,
+                    first_name: profileData.first_name,
+                    last_name: profileData.last_name,
+                    phone_number: profileData.phone_number,
+                    date_of_birth: profileData.date_of_birth,
+                    avatar_url: uploadedAvatarUrl || profileData.avatar_url,
+                    preferred_language: profileData.preferred_language || 'en',
+                    preferred_currency: profileData.preferred_currency || 'USD'
+                };
+                const [createdProfile] = yield database_1.database
+                    .insert(schema_1.userProfiles)
+                    .values(data)
+                    .returning();
+                return {
+                    data: createdProfile,
+                    status: helpers_1.HttpStatusCodes.CREATED,
+                    message: "User Profile Created Successfully"
+                };
+            }
+            catch (error) {
+                return {
+                    data: '',
+                    message: error instanceof Error ? error.message : 'An unknown error occurred',
+                    status: helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR
+                };
+            }
+        });
+    }
+    getMyProfile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const user_ID = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            if (!user_ID) {
+                return {
+                    data: '',
+                    message: "User not authenticated",
+                    status: helpers_1.HttpStatusCodes.UNAUTHORIZED
+                };
+            }
+            try {
+                const [profileData] = yield database_1.database
+                    .select(this.profileSelectFields())
+                    .from(schema_1.userTable)
+                    .leftJoin(schema_1.userProfiles, (0, drizzle_orm_1.eq)(schema_1.userTable.id, schema_1.userProfiles.user_id))
+                    .where((0, drizzle_orm_1.eq)(schema_1.userTable.id, user_ID))
+                    .limit(1);
+                return {
+                    data: profileData,
+                    status: helpers_1.HttpStatusCodes.OK,
+                    message: "User Profile Retrieved Successfully"
                 };
             }
             catch (error) {

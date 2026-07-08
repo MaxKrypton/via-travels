@@ -6,17 +6,16 @@ import {
   TouchableOpacity,
   Modal,
   StyleSheet,
-  ScrollView,
   SafeAreaView
 } from 'react-native';
-import { useCurrency } from '../context/CurrencyContext';
+import { CURRENCY_INFO, useCurrency } from '../context/CurrencyContext';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const CURRENCY_INFO = {
-  RWF: { name: 'Rwandan Franc', symbol: 'FRw', flag: '🇷🇼' },
-  USD: { name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
-  EUR: { name: 'Euro', symbol: '€', flag: '🇪🇺' },
-  GBP: { name: 'British Pound', symbol: '£', flag: '🇬🇧' }
+const FLAGS = {
+  RWF: '🇷🇼',
+  USD: '🇺🇸',
+  EUR: '🇪🇺',
+  GBP: '🇬🇧'
 };
 
 export const CurrencySelector = ({ visible, onClose }) => {
@@ -48,7 +47,7 @@ export const CurrencySelector = ({ visible, onClose }) => {
             </View>
 
             {/* Currency List */}
-            <ScrollView style={styles.listContainer}>
+            <View style={styles.listContainer}>
               {availableCurrencies.map((currency) => {
                 const info = CURRENCY_INFO[currency];
                 const isSelected = selectedCurrency === currency;
@@ -64,7 +63,7 @@ export const CurrencySelector = ({ visible, onClose }) => {
                     activeOpacity={0.7}
                   >
                     <View style={styles.currencyLeft}>
-                      <Text style={styles.flag}>{info.flag}</Text>
+                      <Text style={styles.flag}>{FLAGS[currency]}</Text>
                       <View style={styles.currencyInfo}>
                         <Text style={styles.currencyCode}>
                           {currency}
@@ -91,7 +90,7 @@ export const CurrencySelector = ({ visible, onClose }) => {
                   </TouchableOpacity>
                 );
               })}
-            </ScrollView>
+            </View>
 
             {/* Info Text */}
             <View style={styles.footer}>
@@ -146,7 +145,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   listContainer: {
-    flex: 1,
+    paddingVertical: 8,
   },
   currencyItem: {
     flexDirection: 'row',

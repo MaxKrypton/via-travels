@@ -13,13 +13,24 @@ import {
 import React, { useState, useContext, useEffect } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
-import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
 import AuthContext from "../context/AuthContext";
 import { useCurrency } from "../context/CurrencyContext";
 import { CurrencySelector } from "./CurrencySelector";
+import apiService from "../services/api";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
+
+const normalizeProfile = (profile = {}) => ({
+  profileId: profile.profileId || profile.profile_id || profile.id || null,
+  first_name: profile.first_name || profile.firstName || "",
+  last_name: profile.last_name || profile.lastName || "",
+  phone_number: profile.phone_number || profile.phoneNumber || "",
+  date_of_birth: profile.date_of_birth || profile.dateOfBirth || null,
+  avatar_url: profile.avatar_url || profile.avatarUrl || null,
+  preferred_language: profile.preferred_language || profile.preferredLanguage || "en",
+  preferred_currency: profile.preferred_currency || profile.preferredCurrency || null,
+});
 
 const PersonalDetails = () => {
   const [firstName, setFirstName] = useState("");
@@ -30,26 +41,62 @@ const PersonalDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
-  const { user, ip, authToken } = useContext(AuthContext);
-  const { selectedCurrency, changeCurrency } = useCurrency();
+  const { user, updateUser } = useContext(AuthContext);
+  const { selectedCurrency, changeCurrency, getCurrencySymbol } = useCurrency();
 
   // Load user data on mount
   useEffect(() => {
     if (user) {
-      setFirstName(user.first_name || "");
-      setLastName(user.last_name || "");
-      setPhoneNumber(user.phone_number || "");
-      if (user.date_of_birth) {
-        setBirthDate(new Date(user.date_of_birth));
+      const profile = normalizeProfile(user);
+      setFirstName(profile.first_name || "");
+      setLastName(profile.last_name || "");
+      setPhoneNumber(profile.phone_number || "");
+      if (profile.date_of_birth) {
+        setBirthDate(new Date(profile.date_of_birth));
       }
-      if (user.avatar_url) {
-        setAvatar(user.avatar_url);
+      if (profile.avatar_url) {
+        setAvatar(profile.avatar_url);
       }
-      if (user.preferred_currency) {
-        changeCurrency(user.preferred_currency);
+      if (profile.preferred_currency) {
+        changeCurrency(profile.preferred_currency);
       }
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await apiService.profile.getMe();
+        const profile = normalizeProfile(response.data?.data || {});
+
+        setFirstName(profile.first_name || "");
+        setLastName(profile.last_name || "");
+        setPhoneNumber(profile.phone_number || "");
+
+        if (profile.date_of_birth) {
+          setBirthDate(new Date(profile.date_of_birth));
+        }
+
+        if (profile.avatar_url) {
+          setAvatar(profile.avatar_url);
+        }
+
+        if (profile.preferred_currency) {
+          changeCurrency(profile.preferred_currency);
+        }
+
+        if (user && updateUser) {
+          await updateUser({ ...user, ...profile });
+        }
+      } catch (error) {
+        console.warn('Could not load profile details:', error.response?.data?.message || error.message);
+      }
+    };
+
+    if (user) {
+      fetchProfile();
+    }
+  }, []);
 
   const onChangeBirthdate = (e, selectedDate) => {
     if (selectedDate) {
@@ -131,18 +178,16 @@ const PersonalDetails = () => {
       formData.append('preferred_language', 'en');
       formData.append('preferred_currency', selectedCurrency);
 
-      const response = await axios.patch(
-        `http://${ip}:8000/api/v1/profile/update/${user.id}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${authToken}`
-          }
-        }
-      );
+      const response = await apiService.profile.updateMe(formData);
 
-      if (response.data.success || response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
+        const updatedProfile = normalizeProfile(response.data?.data || {});
+        if (updateUser) {
+          await updateUser({ ...user, ...updatedProfile });
+        }
+        if (updatedProfile.avatar_url) {
+          setAvatar(updatedProfile.avatar_url);
+        }
         Toast.show({
           type: "success",
           text1: "Profile Updated",
@@ -264,7 +309,7 @@ const PersonalDetails = () => {
           >
             <MaterialIcons name="attach-money" size={20} color="#8E8E93" />
             <Text style={styles.input}>
-              {selectedCurrency}
+              {getCurrencySymbol()} {selectedCurrency}
             </Text>
             <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
           </TouchableOpacity>

@@ -8,34 +8,72 @@ import {
   TouchableOpacity,
   Modal,
   StatusBar,
-  Dimensions,
   Platform,
   ActivityIndicator,
 } from "react-native";
-import React, { useState, useContext } from "react"
+import React, { useState, useContext, useCallback } from "react"
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AuthContext from "../context/AuthContext";
 import { useCurrency } from "../context/CurrencyContext";
 import { CurrencySelector } from "../components/CurrencySelector";
+import apiService from "../services/api";
 import axios from "axios";
 import { Alert } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Entypo from '@expo/vector-icons/Entypo';
 import Octicons from '@expo/vector-icons/Octicons';
 import WelcomeScreen from "./WelcomeScreen";
 
-const { width } = Dimensions.get('window');
+const normalizeProfile = (profile = {}) => ({
+  first_name: profile.first_name || profile.firstName || "",
+  last_name: profile.last_name || profile.lastName || "",
+  avatar_url: profile.avatar_url || profile.avatarUrl || null,
+});
 
 const ProfileScreen = () => {
-  const { user, isAuthenticated, logout, authToken, ip } = useContext(AuthContext);
-  const { selectedCurrency } = useCurrency();
+  const { user, isAuthenticated, logout, authToken, ip, updateUser } = useContext(AuthContext);
+  const { selectedCurrency, getCurrencySymbol } = useCurrency();
   const navigation = useNavigation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [profile, setProfile] = useState(() => normalizeProfile(user));
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const fetchProfile = async () => {
+        if (!isAuthenticated) return;
+
+        try {
+          const response = await apiService.profile.getMe();
+          const profileData = normalizeProfile(response.data?.data || {});
+
+          if (isActive) {
+            setProfile(profileData);
+          }
+
+          if (user && updateUser) {
+            await updateUser({ ...user, ...profileData });
+          }
+        } catch (error) {
+          console.warn('Could not refresh profile:', error.response?.data?.message || error.message);
+        }
+      };
+
+      fetchProfile();
+
+      return () => {
+        isActive = false;
+      };
+    }, [isAuthenticated, user?.id])
+  );
+
+  const displayName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user?.username || "Welcome User";
+  const avatarUrl = profile.avatar_url || user?.avatar_url || user?.avatarUrl;
 
   const handleLogOut = async () => {
     try {
@@ -97,7 +135,7 @@ const ProfileScreen = () => {
           <View style={styles.profileHeader}>
             <View style={styles.profileImageContainer}>
               <Image
-                source={require("../assets/images/me.jpg")}
+                source={avatarUrl ? { uri: avatarUrl } : require("../assets/images/me.jpg")}
                 style={styles.profileImage}
               />
               <View style={styles.onlineIndicator} />
@@ -105,10 +143,10 @@ const ProfileScreen = () => {
             
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>
-                {user.username || "Welcome User"}
+                {displayName}
               </Text>
               <Text style={styles.userEmail}>
-                {user.email || "No email found"}
+                {user?.email || "No email found"}
               </Text>
               
               <TouchableOpacity
@@ -124,15 +162,15 @@ const ProfileScreen = () => {
 
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           <SafeAreaView style={styles.contentArea}>
-            {/* My Trips Section */}
+            {/* Itinerary Section */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>My Trips</Text>
+              <Text style={styles.sectionTitle}>My Itineraries</Text>
               <View style={styles.menuContainer}>
                 <MenuItem
-                  icon={<MaterialCommunityIcons name="calendar-check" size={22} color="#1995AD" />}
-                  title="My Bookings"
-                  subtitle="View your reservations"
-                  onPress={() => navigation.navigate("My Trips")}
+                  icon={<MaterialCommunityIcons name="map-clock" size={22} color="#1995AD" />}
+                  title="Saved Itineraries"
+                  subtitle="View your saved trip plans"
+                  onPress={() => navigation.navigate("Saved Itineraries")}
                   showBorder={false}
                 />
               </View>
@@ -168,7 +206,7 @@ const ProfileScreen = () => {
                 <MenuItem
                   icon={<MaterialIcons name="attach-money" size={22} color="#1995AD" />}
                   title="Currency"
-                  subtitle={selectedCurrency}
+                  subtitle={`${getCurrencySymbol()} ${selectedCurrency}`}
                   onPress={() => setShowCurrencyPicker(true)}
                 />
                 <MenuItem

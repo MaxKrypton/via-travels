@@ -14,6 +14,10 @@ exports.ProfileRoute = (0, express_1.Router)();
 exports.ProfileRoute.get('/all-profiles', authMiddleware_1.authMiddleware, (req, res) => {
     return profile_1.profileService.getAllProfile(req, res);
 });
+// get current user's profile
+exports.ProfileRoute.get('/me', authMiddleware_1.authMiddleware, (req, res) => {
+    return profile_1.profileService.getMyProfile(req, res);
+});
 // get a specific user profile
 exports.ProfileRoute.get('/:profileId', authMiddleware_1.authMiddleware, (req, res) => {
     return profile_1.profileService.getSpecificProfile(req, res);
@@ -27,6 +31,13 @@ exports.ProfileRoute.post('/register', authMiddleware_1.authMiddleware, multer_1
     return profile_1.profileService.registerProfile(req, res);
 });
 // Update a user Profile
+exports.ProfileRoute.patch('/me', authMiddleware_1.authMiddleware, multer_1.upload.single('profilePicture'), (0, contentAwareImageMiddleware_1.default)({
+    maxWidth: 500,
+    maxHeight: 500,
+    quality: 85
+}), (req, res) => {
+    return profile_1.profileService.upsertMyProfile(req, res);
+});
 exports.ProfileRoute.patch('/update/:profileId', authMiddleware_1.authMiddleware, multer_1.upload.single('profilePicture'), (0, contentAwareImageMiddleware_1.default)({
     maxWidth: 500,
     maxHeight: 500,

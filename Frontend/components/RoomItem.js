@@ -7,23 +7,25 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useCurrency } from '../context/CurrencyContext';
 
 const RoomItem = ({ item, updateRoomPrice }) => {
   const [roomCount, setRoomCount] = useState(0);
+  const { formatPrice } = useCurrency();
+  const roomCurrency = item.currency || 'RWF';
+  const roomFee = parseFloat(item.roomFee || 0);
 
   const handleIncrement = () => {
     const newCount = roomCount + 1;
     setRoomCount(newCount);
-    // FIXED: Use item.id instead of item.type to prevent overwriting
-    updateRoomPrice(item.id, newCount, parseFloat(item.roomFee));
+    updateRoomPrice(item.id, newCount, roomFee, roomCurrency);
   };
 
   const handleDecrement = () => {
     if (roomCount > 0) {
       const newCount = roomCount - 1;
       setRoomCount(newCount);
-      // FIXED: Use item.id instead of item.type to prevent overwriting
-      updateRoomPrice(item.id, newCount, parseFloat(item.roomFee));
+      updateRoomPrice(item.id, newCount, roomFee, roomCurrency);
     }
   };
 
@@ -86,7 +88,7 @@ const RoomItem = ({ item, updateRoomPrice }) => {
         <View style={styles.bottomRow}>
           <View style={styles.priceContainer}>
             <Text style={styles.priceLabel}>Price per night</Text>
-            <Text style={styles.price}>{item.currency || 'RWF'} {parseFloat(item.roomFee).toLocaleString()}</Text>
+            <Text style={styles.price}>{formatPrice(roomFee, roomCurrency)}</Text>
           </View>
 
           {item.available_inventory > 0 ? (
@@ -128,8 +130,7 @@ const RoomItem = ({ item, updateRoomPrice }) => {
           <View style={styles.selectedInfo}>
             <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
             <Text style={styles.selectedText}>
-              {roomCount} {roomCount === 1 ? 'room' : 'rooms'} selected - Total: {item.currency || 'RWF'}{' '}
-              {(roomCount * parseFloat(item.roomFee)).toLocaleString()}
+              {roomCount} {roomCount === 1 ? 'room' : 'rooms'} selected - Total: {formatPrice(roomCount * roomFee, roomCurrency)}
             </Text>
           </View>
         )}

@@ -14,10 +14,13 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import AuthContext from '../context/AuthContext';
 import axios from 'axios';
+import { useCurrency } from '../context/CurrencyContext';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { grandTotal, bookingData, bookingId } = route.params;
-  const { user, ip, authToken, isAuthenticated } = useContext(AuthContext);
+  const { ip, authToken, isAuthenticated } = useContext(AuthContext);
+  const { formatPrice } = useCurrency();
+  const paymentCurrency = bookingData?.currency || bookingData?.rooms?.[0]?.currency || 'RWF';
   
   const [loading, setLoading] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState(bookingData?.checkout_url || null);
@@ -295,7 +298,7 @@ const PaymentScreen = ({ route, navigation }) => {
           <View style={styles.summaryRow}>
             <Text style={styles.totalLabel}>Total Amount</Text>
             <Text style={styles.totalValue}>
-              {user?.preferred_currency || 'RWF'} {grandTotal.toLocaleString()}
+              {formatPrice(grandTotal, paymentCurrency)}
             </Text>
           </View>
         </View>

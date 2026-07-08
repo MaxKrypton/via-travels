@@ -16,9 +16,11 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import AuthContext from "../context/AuthContext";
 import axios from "axios";
 import RoomItem from "../components/RoomItem";
+import { useCurrency } from "../context/CurrencyContext";
 
 const BookingScreen = ({ navigation, route }) => {
-  const { currentID, user, ip, authToken, isAuthenticated } = useContext(AuthContext);
+  const { currentID, ip, authToken, isAuthenticated } = useContext(AuthContext);
+  const { formatPrice } = useCurrency();
   const hotelId = currentID;
   
   const [adults, setAdults] = useState(1);
@@ -110,7 +112,7 @@ const BookingScreen = ({ navigation, route }) => {
     }
   };
 
-  const updateRoomPrice = (roomId, count, pricePerRoom) => {
+  const updateRoomPrice = (roomId, count, pricePerRoom, currency = 'RWF') => {
     setRoomPrices((prev) => {
       const updatedPrices = {
         ...prev,
@@ -119,6 +121,7 @@ const BookingScreen = ({ navigation, route }) => {
           pricePerRoom: pricePerRoom,
           totalPrice: pricePerRoom * count,
           roomType: roomInfo.find(r => r.id === roomId)?.type || 'Unknown',
+          currency,
         },
       };
       return updatedPrices;
@@ -134,6 +137,11 @@ const BookingScreen = ({ navigation, route }) => {
   }, [roomPrices]);
 
   const grandTotal = totalPrice + serviceFee;
+  const selectedRoomCurrencies = Object.values(roomPrices)
+    .filter((room) => room.count > 0)
+    .map((room) => room.currency)
+    .filter(Boolean);
+  const bookingCurrency = selectedRoomCurrencies[0] || roomInfo?.[0]?.currency || "RWF";
   const numberOfNights = Math.ceil(
     (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
   );
@@ -238,6 +246,7 @@ const BookingScreen = ({ navigation, route }) => {
             count: data.count,
             pricePerRoom: data.pricePerRoom,
             totalPrice: data.totalPrice,
+            currency: data.currency || bookingCurrency,
           }));
 
         const bookingData = {
@@ -250,6 +259,7 @@ const BookingScreen = ({ navigation, route }) => {
           children: children,
           rooms: selectedRooms,
           nights: numberOfNights,
+          currency: bookingCurrency,
           checkout_url: checkout_url,
           tx_ref: booking.tx_ref,
         };
@@ -271,9 +281,6 @@ const BookingScreen = ({ navigation, route }) => {
       );
     } finally {
       setLoading(false);
-      console.log('User object:', user);
-console.log('User token:', user?.token);
-console.log('User ID:', userId);
     }
   };
 
@@ -398,14 +405,14 @@ console.log('User ID:', userId);
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Room Fee</Text>
             <Text style={styles.priceValue}>
-              {user?.preferred_currency || "RWF"} {totalPrice.toLocaleString()}
+              {formatPrice(totalPrice, bookingCurrency)}
             </Text>
           </View>
 
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Service Fee</Text>
             <Text style={styles.priceValue}>
-              {user?.preferred_currency || "RWF"} {serviceFee.toLocaleString()}
+              {formatPrice(serviceFee, bookingCurrency)}
             </Text>
           </View>
 
@@ -414,7 +421,7 @@ console.log('User ID:', userId);
           <View style={styles.priceRow}>
             <Text style={styles.totalLabel}>Total Price</Text>
             <Text style={styles.totalValue}>
-              {user?.preferred_currency || "RWF"} {grandTotal.toLocaleString()}
+              {formatPrice(grandTotal, bookingCurrency)}
             </Text>
           </View>
         </View>

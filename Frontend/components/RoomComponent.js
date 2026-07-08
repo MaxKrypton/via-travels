@@ -3,10 +3,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import axios from "axios"
 import AuthContext from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const RoomComponent = ({roomInfo}) => {
 
   const {currentID, currentRoomId, setCurrentRoomId, ip} = useContext(AuthContext)
+  const { formatPrice } = useCurrency();
   const [room, setRoom] = useState()
   
 useEffect(() =>{
@@ -47,7 +49,7 @@ useEffect(() =>{
                     {item?.roomType}
                   </Text>
                   <Text style={styles.price}>
-                    ${item?.roomFee}
+                    {formatPrice(item?.roomFee || 0, item?.currency || 'RWF')}
                   </Text>
                 </View>
                 

@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import apiService from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 
 const CATEGORIES = [
   { key: '', label: 'All', icon: 'globe-outline' },
@@ -44,6 +45,7 @@ const CATEGORY_TEXT_COLORS = {
 };
 
 export default function AttractionsScreen() {
+  const { formatPrice } = useCurrency();
   const [entries, setEntries] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [activeCategory, setActiveCategory] = useState('');
@@ -226,8 +228,8 @@ export default function AttractionsScreen() {
                 <Text style={styles.modalDesc}>{selectedEntry.description}</Text>
 
                 <View style={styles.modalInfoRow}>
-                  <InfoItem icon="cash-outline" label="Price (USD)" value={selectedEntry.price_usd > 0 ? `$${selectedEntry.price_usd}` : 'Free'} />
-                  <InfoItem icon="cellular-outline" label="Price (RWF)" value={selectedEntry.price_rwf > 0 ? `${selectedEntry.price_rwf.toLocaleString()} RWF` : 'Free'} />
+                  <InfoItem icon="cash-outline" label="Price" value={selectedEntry.price_usd > 0 ? formatPrice(selectedEntry.price_usd, 'USD') : 'Free'} />
+                  <InfoItem icon="cellular-outline" label="Local Price" value={selectedEntry.price_rwf > 0 ? formatPrice(selectedEntry.price_rwf, 'RWF') : 'Free'} />
                 </View>
                 {selectedEntry.contact && (
                   <View style={styles.contactRow}>

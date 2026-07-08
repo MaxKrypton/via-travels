@@ -32,6 +32,7 @@ import RoomComponent from "../components/RoomComponent";
 import MapLocation from "../components/MapLocation";
 import Loading from "./LoadingScreen";
 import { WebView } from "react-native-webview";
+import { useCurrency } from "../context/CurrencyContext";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 350;
@@ -56,9 +57,11 @@ const HotelProfile = () => {
   const [media, setMedia] = useState();
   const [roomInfo, setRoomInfo] = useState();
   const [basePrice, setBaseprice] = useState();
+  const [baseCurrency, setBaseCurrency] = useState("RWF");
   const [menu, setMenu] = useState();
   const [email, setEmail] = useState()
   const [phone, setPhone] = useState()
+  const { formatPrice } = useCurrency();
 
   //API Calls
   useEffect(() => {
@@ -94,6 +97,7 @@ const HotelProfile = () => {
 
         setBg(hotelDetails.media?.[0]?.url);
         setBaseprice(hotelDetails.rooms?.[0]?.roomFee);
+        setBaseCurrency(hotelDetails.rooms?.[0]?.currency || "RWF");
         setMenu(hotelDetails.menu_download_url || null);
         setIsLoading(false);
       })
@@ -157,16 +161,32 @@ const HotelProfile = () => {
         <View style={styles.content}>
           {/* Header Section */}
           <InfoCard style={styles.headerCard}>
-            <View style={styles.headerRow}>
-              <View style={styles.headerLeft}>
-                <Text style={styles.hotelName}>{hotelName}</Text>
-                <View style={styles.locationRow}>
-                  <Entypo name="location" size={20} color="#1995AD" />
-                  <Text style={styles.address}>{adresse}</Text>
+            <View style={styles.hotelTitleRow}>
+              <Text style={styles.hotelName} numberOfLines={3}>{hotelName}</Text>
+              {!!rate && (
+                <View style={styles.ratingPill}>
+                  <FontAwesome name="star" size={13} color="#F9A825" />
+                  <Text style={styles.ratingPillText}>{rate}</Text>
                 </View>
+              )}
+            </View>
+
+            <View style={styles.locationRow}>
+              <Entypo name="location" size={20} color="#1995AD" />
+              <Text style={styles.address} numberOfLines={2}>{adresse}</Text>
+            </View>
+
+            <View style={styles.headerFooterRow}>
+              <View style={styles.roomPill}>
+                <MaterialCommunityIcons name="bed-king-outline" size={18} color="#1995AD" />
+                <Text style={styles.roomPillText}>
+                  {room ? `${room} rooms` : "Rooms available"}
+                </Text>
               </View>
+
               <View style={styles.priceContainer}>
-                <Text style={styles.price}>${basePrice}</Text>
+                <Text style={styles.priceEyebrow}>From</Text>
+                <Text style={styles.price}>{formatPrice(basePrice || 0, baseCurrency)}</Text>
                 <Text style={styles.priceLabel}>per night</Text>
               </View>
             </View>
@@ -391,39 +411,85 @@ const styles = StyleSheet.create({
   headerCard: {
     marginTop: 16,
   },
-  headerRow: {
+  hotelTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-  },
-  headerLeft: {
-    flex: 1,
-    marginRight: 16,
+    gap: 12,
   },
   hotelName: {
-    fontSize: 26,
-    fontWeight: "700",
+    flex: 1,
+    fontSize: 28,
+    fontWeight: "800",
     color: "#1A1A1A",
-    marginBottom: 8,
+    lineHeight: 34,
+  },
+  ratingPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: "#FFF7E0",
+  },
+  ratingPillText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#8A5A00",
   },
   locationRow: {
     flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
+    alignItems: "flex-start",
+    marginTop: 14,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEF1F3",
   },
   address: {
-    fontSize: 15,
+    fontSize: 16,
     color: "#666",
-    marginLeft: 6,
+    marginLeft: 8,
     flex: 1,
+    lineHeight: 23,
+  },
+  headerFooterRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 16,
+  },
+  roomPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 40,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    backgroundColor: "#F0FAFC",
+  },
+  roomPillText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#176E80",
   },
   priceContainer: {
     alignItems: "flex-end",
+    flexShrink: 1,
+    minWidth: 150,
+  },
+  priceEyebrow: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#8A8A8A",
+    textTransform: "uppercase",
   },
   price: {
-    fontSize: 32,
-    fontWeight: "700",
+    fontSize: 20,
+    fontWeight: "800",
     color: "#1995AD",
+    lineHeight: 36,
   },
   priceLabel: {
     fontSize: 14,

@@ -2,8 +2,10 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useCurrency } from "../context/CurrencyContext";
 
 const TrendingPlaces = ({ item, onPress }) => {
+  const { formatPrice } = useCurrency();
   // Calculate discount percentage if we have both prices
   const originalPrice = item.originalPrice || 389;
   const currentPrice = item.price || 150;
@@ -43,9 +45,9 @@ const TrendingPlaces = ({ item, onPress }) => {
 
         {/* Prominent discount display */}
         <View style={styles.priceComparison}>
-          <Text style={styles.originalPrice}>${originalPrice}</Text>
+          <Text style={styles.originalPrice}>{formatPrice(originalPrice, 'USD')}</Text>
           <View style={styles.savingsPill}>
-            <Text style={styles.savingsText}>Save ${originalPrice - currentPrice}</Text>
+            <Text style={styles.savingsText}>Save {formatPrice(originalPrice - currentPrice, 'USD')}</Text>
           </View>
         </View>
 
@@ -53,7 +55,7 @@ const TrendingPlaces = ({ item, onPress }) => {
           <View>
             <Text style={styles.startFromText}>Start From</Text>
             <Text style={styles.priceText}>
-              ${currentPrice}<Text style={styles.perNightText}>/Night</Text>
+              {formatPrice(currentPrice, 'USD')}<Text style={styles.perNightText}>/Night</Text>
             </Text>
           </View>
           

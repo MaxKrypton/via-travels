@@ -74,6 +74,17 @@ export default function SavedItinerariesScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected] = useState(null);
 
+  const goToPlanner = useCallback(() => {
+    const parentNavigation = navigation.getParent?.();
+
+    if (parentNavigation) {
+      parentNavigation.navigate('Plan', { screen: 'Plan Main' });
+      return;
+    }
+
+    navigation.navigate('Plan Main');
+  }, [navigation]);
+
   const fetchSaved = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
     else setLoading(true);
@@ -187,7 +198,7 @@ export default function SavedItinerariesScreen({ navigation }) {
             {itineraries.length} {itineraries.length === 1 ? 'trip plan' : 'trip plans'}
           </Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Plan Main')} style={styles.newBtn}>
+        <TouchableOpacity onPress={goToPlanner} style={styles.newBtn}>
           <Ionicons name="add" size={18} color="#FFFFFF" />
           <Text style={styles.newBtnText}>New</Text>
         </TouchableOpacity>
@@ -215,7 +226,7 @@ export default function SavedItinerariesScreen({ navigation }) {
               </View>
               <Text style={styles.emptyTitle}>No saved itineraries yet</Text>
               <Text style={styles.emptySub}>Generate your first Rwanda itinerary to get started.</Text>
-              <TouchableOpacity style={styles.generateBtn} onPress={() => navigation.navigate('Plan Main')}>
+              <TouchableOpacity style={styles.generateBtn} onPress={goToPlanner}>
                 <MaterialCommunityIcons name="magic-staff" size={18} color="#FFFFFF" />
                 <Text style={styles.generateBtnText}>Plan a Trip</Text>
               </TouchableOpacity>

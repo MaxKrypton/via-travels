@@ -65,6 +65,39 @@ class ProfileService {
             }
         });
     }
+    upsertMyProfile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const profileData = req.body;
+                const { data, status, message } = yield profile_1.profileRepository.upsertMyProfile(req, res, profileData);
+                return res.status(status).json({
+                    message,
+                    data
+                });
+            }
+            catch (error) {
+                return res.status(helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+                    message: `Server error, ${error}`
+                });
+            }
+        });
+    }
+    getMyProfile(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, status, message } = yield profile_1.profileRepository.getMyProfile(req, res);
+                return res.status(status).json({
+                    message,
+                    data
+                });
+            }
+            catch (error) {
+                return res.status(helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+                    message: `Server error, ${error}`
+                });
+            }
+        });
+    }
     getSpecificProfile(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

@@ -4,17 +4,27 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CurrencyContext = createContext();
 
-// Exchange rates (can be updated from API in production)
-const EXCHANGE_RATES = {
-  RWF: { USD: 0.00078, EUR: 0.00072, GBP: 0.00062, RWF: 1 },
-  USD: { RWF: 1280, EUR: 0.92, GBP: 0.79, USD: 1 },
-  EUR: { RWF: 1391, USD: 1.09, GBP: 0.86, EUR: 1 },
-  GBP: { RWF: 1618, USD: 1.27, EUR: 1.16, GBP: 1 }
+export const CURRENCY_INFO = {
+  RWF: { name: 'Rwandan Franc', symbol: 'FRW', rateToUsd: 1 / 1470, locale: 'en-RW', decimals: 0 },
+  USD: { name: 'US Dollar', symbol: '$', rateToUsd: 1, locale: 'en-US', decimals: 2 },
+  EUR: { name: 'Euro', symbol: '€', rateToUsd: 1.09, locale: 'en-US', decimals: 2 },
+  GBP: { name: 'British Pound', symbol: '£', rateToUsd: 1.27, locale: 'en-GB', decimals: 2 }
+};
+
+const AVAILABLE_CURRENCIES = ['RWF', 'USD'];
+const STORAGE_KEY = 'selectedCurrency';
+
+const parseAmount = (amount) => {
+  if (typeof amount === 'number') return Number.isFinite(amount) ? amount : 0;
+  if (typeof amount === 'string') {
+    const parsed = Number(amount.replace(/,/g, '').trim());
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
 };
 
 export const CurrencyProvider = ({ children }) => {
   const [selectedCurrency, setSelectedCurrency] = useState('RWF');
-  const [exchangeRates] = useState(EXCHANGE_RATES);
 
   useEffect(() => {
     loadCurrency();
@@ -22,54 +32,53 @@ export const CurrencyProvider = ({ children }) => {
 
   const loadCurrency = async () => {
     try {
-      const saved = await AsyncStorage.getItem('selectedCurrency');
-      if (saved) {
+      const saved = await AsyncStorage.getItem(STORAGE_KEY);
+      if (AVAILABLE_CURRENCIES.includes(saved)) {
         setSelectedCurrency(saved);
-        console.log('✅ Currency loaded:', saved);
       }
     } catch (error) {
-      console.error('❌ Error loading currency:', error);
+      console.error('Error loading currency:', error);
     }
   };
 
   const changeCurrency = async (currency) => {
+    if (!AVAILABLE_CURRENCIES.includes(currency)) return;
+
     try {
-      await AsyncStorage.setItem('selectedCurrency', currency);
+      await AsyncStorage.setItem(STORAGE_KEY, currency);
       setSelectedCurrency(currency);
-      console.log('✅ Currency changed to:', currency);
     } catch (error) {
-      console.error('❌ Error saving currency:', error);
+      console.error('Error saving currency:', error);
     }
   };
 
   const convertPrice = (amount, fromCurrency = 'RWF') => {
-    if (!amount || isNaN(amount)) return 0;
-    if (fromCurrency === selectedCurrency) return parseFloat(amount);
+    const numericAmount = parseAmount(amount);
+    const sourceCurrency = CURRENCY_INFO[fromCurrency] ? fromCurrency : 'RWF';
 
-    const rate = exchangeRates[fromCurrency]?.[selectedCurrency];
-    if (!rate) return parseFloat(amount);
+    if (sourceCurrency === selectedCurrency) return numericAmount;
 
-    return parseFloat((amount * rate).toFixed(2));
+    const amountInUsd = numericAmount * CURRENCY_INFO[sourceCurrency].rateToUsd;
+    const converted = amountInUsd / CURRENCY_INFO[selectedCurrency].rateToUsd;
+    return Number(converted.toFixed(CURRENCY_INFO[selectedCurrency].decimals));
   };
 
-  const formatPrice = (amount, fromCurrency = 'RWF', showSymbol = true) => {
+  const formatPrice = (amount, fromCurrency = 'RWF', options = {}) => {
+    const { showCode = false, approximate = false } = options;
     const converted = convertPrice(amount, fromCurrency);
-    const formatted = converted.toLocaleString('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
+    const info = CURRENCY_INFO[selectedCurrency];
+    const formatted = converted.toLocaleString(info.locale, {
+      minimumFractionDigits: info.decimals === 0 ? 0 : 2,
+      maximumFractionDigits: info.decimals
     });
 
-    return showSymbol ? `${selectedCurrency} ${formatted}` : formatted;
+    const prefix = approximate ? '~' : '';
+    const suffix = showCode ? ` ${selectedCurrency}` : '';
+    return `${prefix}${info.symbol} ${formatted}${suffix}`;
   };
 
   const getCurrencySymbol = (currency = selectedCurrency) => {
-    const symbols = {
-      RWF: 'FRw',
-      USD: '$',
-      EUR: '€',
-      GBP: '£'
-    };
-    return symbols[currency] || currency;
+    return CURRENCY_INFO[currency]?.symbol || currency;
   };
 
   return (
@@ -79,8 +88,8 @@ export const CurrencyProvider = ({ children }) => {
       convertPrice,
       formatPrice,
       getCurrencySymbol,
-      availableCurrencies: Object.keys(EXCHANGE_RATES),
-      exchangeRates
+      availableCurrencies: AVAILABLE_CURRENCIES,
+      currencyInfo: CURRENCY_INFO
     }}>
       {children}
     </CurrencyContext.Provider>

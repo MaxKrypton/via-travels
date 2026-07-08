@@ -16,6 +16,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import apiService from '../services/api';
 import AuthContext from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const HotDealsScreen = () => {
   const [deals, setDeals] = useState([]);
@@ -23,6 +24,7 @@ const HotDealsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
   const { setCurrentID, setCurrentRoomId } = useContext(AuthContext);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     fetchHotDeals();
@@ -56,6 +58,7 @@ const HotDealsScreen = () => {
   };
 
   const renderDealItem = ({ item }) => {
+    const currency = item.currency || 'USD';
     const discountedPrice = calculateDiscountedPrice(
       item.original_price || 0,
       item.discount_percentage || 0
@@ -97,10 +100,10 @@ const HotDealsScreen = () => {
           <View style={styles.priceContainer}>
             <View style={styles.priceRow}>
               <Text style={styles.originalPrice}>
-                ${parseFloat(item.original_price || 0).toFixed(2)}
+                {formatPrice(item.original_price || 0, currency)}
               </Text>
               <Text style={styles.discountedPrice}>
-                ${discountedPrice.toFixed(2)}
+                {formatPrice(discountedPrice, currency)}
               </Text>
             </View>
             <Text style={styles.perNight}>per night</Text>

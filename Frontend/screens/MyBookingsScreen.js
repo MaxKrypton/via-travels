@@ -17,11 +17,13 @@ import AuthContext from '../context/AuthContext';
 import axios from 'axios';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useCurrency } from '../context/CurrencyContext';
 
 const { width } = Dimensions.get('window');
 
 const MyBookingsScreen = () => {
   const { authToken, ip, isAuthenticated, logout } = useContext(AuthContext);
+  const { formatPrice } = useCurrency();
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'completed', 'all'
@@ -165,7 +167,7 @@ const MyBookingsScreen = () => {
         <View style={styles.priceContainer}>
           <Text style={styles.totalLabel}>Total Amount:</Text>
           <Text style={styles.totalPrice}>
-            {booking.currency} {parseFloat(booking.total_price).toFixed(2)}
+            {formatPrice(booking.total_price, booking.currency || 'RWF')}
           </Text>
         </View>
 
@@ -260,7 +262,7 @@ const MyBookingsScreen = () => {
                       {room.num_rooms}x {room.room_type}
                     </Text>
                     <Text style={styles.roomDetailPrice}>
-                      {selectedInvoice.currency} {room.subtotal}
+                      {formatPrice(room.subtotal, selectedInvoice.currency || 'RWF')}
                     </Text>
                   </View>
                 ))}
@@ -272,19 +274,19 @@ const MyBookingsScreen = () => {
                 <View style={styles.invoiceRow}>
                   <Text style={styles.invoiceText}>Subtotal:</Text>
                   <Text style={styles.invoiceText}>
-                    {selectedInvoice.currency} {selectedInvoice.subtotal}
+                    {formatPrice(selectedInvoice.subtotal, selectedInvoice.currency || 'RWF')}
                   </Text>
                 </View>
                 <View style={styles.invoiceRow}>
                   <Text style={styles.invoiceText}>Tax (10%):</Text>
                   <Text style={styles.invoiceText}>
-                    {selectedInvoice.currency} {selectedInvoice.tax}
+                    {formatPrice(selectedInvoice.tax, selectedInvoice.currency || 'RWF')}
                   </Text>
                 </View>
                 <View style={[styles.invoiceRow, styles.totalRow]}>
                   <Text style={styles.totalLabel}>Total:</Text>
                   <Text style={styles.totalAmount}>
-                    {selectedInvoice.currency} {selectedInvoice.total}
+                    {formatPrice(selectedInvoice.total, selectedInvoice.currency || 'RWF')}
                   </Text>
                 </View>
 

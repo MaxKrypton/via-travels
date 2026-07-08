@@ -115,6 +115,7 @@ const ProfileNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen name={PROFILE} component={ProfileScreen} options={{ headerTransparent: true, headerShown: true, title: "" }} />
     <Stack.Screen name="Personal Info" component={PersonalDetails} options={{ headerTransparent: true, headerShown: true, title: "" }} />
+    <Stack.Screen name="Saved Itineraries" component={SavedItinerariesScreen} options={{ headerShown: false }} />
     <Stack.Screen name="HelpSupport" component={HelpSupportScreen} options={{ headerTransparent: true, headerShown: true, title: "" }} />
     <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ headerTransparent: true, headerShown: true, title: "" }} />
     <Stack.Screen name="ReportProblem" component={ReportProblemScreen} options={{ headerTransparent: true, headerShown: true, title: "" }} />

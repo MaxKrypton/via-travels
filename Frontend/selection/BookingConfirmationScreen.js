@@ -9,9 +9,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useCurrency } from '../context/CurrencyContext';
 
 const BookingConfirmationScreen = ({ route, navigation }) => {
   const { transactionData, bookingData } = route.params;
+  const { formatPrice } = useCurrency();
+  const transactionCurrency = transactionData?.currency || bookingData?.currency || 'RWF';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -51,8 +54,7 @@ const BookingConfirmationScreen = ({ route, navigation }) => {
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Amount Paid</Text>
             <Text style={styles.detailValueHighlight}>
-              {transactionData?.currency || 'RWF'}{' '}
-              {transactionData?.amount?.toLocaleString() || '0'}
+              {formatPrice(transactionData?.amount || 0, transactionCurrency)}
             </Text>
           </View>
 
