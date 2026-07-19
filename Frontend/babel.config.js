@@ -1,9 +1,16 @@
 module.exports = function (api) {
   api.cache(true);
+  const expoPreset = (() => {
+    try {
+      return require.resolve("babel-preset-expo");
+    } catch (error) {
+      return require.resolve("expo/node_modules/babel-preset-expo");
+    }
+  })();
+
   return {
-    presets: ["babel-preset-expo"],
+    presets: [expoPreset],
     plugins: [
-      "react-native-reanimated/plugin",
       [
         "module:react-native-dotenv",
         {
@@ -12,7 +19,8 @@ module.exports = function (api) {
           safe: false,
           allowUndefined: true,
         }
-      ]
+      ],
+      "react-native-reanimated/plugin",
     ],
   };
 };
