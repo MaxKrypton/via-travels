@@ -96,7 +96,7 @@ const SponsoredPost = ({ posts }) => {
 
               {/* Favorite Button */}
               <TouchableOpacity style={styles.expandedFavoriteButton}>
-                <AntDesign name="hearto" size={24} color="white" />
+                <Feather name="heart" size={24} color="white" />
               </TouchableOpacity>
 
               {/* Content */}
@@ -203,7 +203,7 @@ const SponsoredPost = ({ posts }) => {
             // Add favorite functionality here
           }}
         >
-          <AntDesign name="hearto" size={24} color="white" />
+          <Feather name="heart" size={24} color="white" />
         </TouchableOpacity>
 
         {/* Content Area */}

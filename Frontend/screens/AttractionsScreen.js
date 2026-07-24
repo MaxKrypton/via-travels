@@ -45,7 +45,7 @@ const CATEGORY_TEXT_COLORS = {
 };
 
 export default function AttractionsScreen() {
-  const { formatPrice } = useCurrency();
+  const { selectedCurrency, formatPrice } = useCurrency();
   const [entries, setEntries] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [activeCategory, setActiveCategory] = useState('');
@@ -100,6 +100,17 @@ export default function AttractionsScreen() {
     applyFilters(entries, activeCategory, text);
   };
 
+  const getEntryPriceValue = (entry) => {
+    const priceUSD = entry.price_usd ?? entry.priceUSD ?? 0;
+    const priceRWF = entry.price_rwf ?? entry.priceRWF ?? 0;
+
+    if (selectedCurrency === 'USD' && priceUSD > 0) return formatPrice(priceUSD, 'USD');
+    if (selectedCurrency === 'RWF' && priceRWF > 0) return formatPrice(priceRWF, 'RWF');
+    if (priceUSD > 0) return formatPrice(priceUSD, 'USD');
+    if (priceRWF > 0) return formatPrice(priceRWF, 'RWF');
+    return 'Free';
+  };
+
   const renderEntry = ({ item }) => (
     <TouchableOpacity style={styles.card} onPress={() => setSelectedEntry(item)} activeOpacity={0.85}>
       <View style={styles.cardHeader}>
@@ -108,12 +119,9 @@ export default function AttractionsScreen() {
             {item.category}
           </Text>
         </View>
-        {item.price_usd > 0 && (
-          <Text style={styles.price}>${item.price_usd}</Text>
-        )}
-        {item.price_usd === 0 && (
-          <Text style={[styles.price, { color: '#2E7D32' }]}>Free</Text>
-        )}
+        <Text style={[styles.price, getEntryPriceValue(item) === 'Free' && styles.freePrice]}>
+          {getEntryPriceValue(item)}
+        </Text>
       </View>
       <Text style={styles.cardTitle}>{item.name}</Text>
       <View style={styles.locationRow}>
@@ -131,7 +139,9 @@ export default function AttractionsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Explore Rwanda</Text>
-        <Text style={styles.headerSub}>{filtered.length} places to discover</Text>
+        <Text style={styles.headerSub}>
+          {filtered.length} places to discover - Prices in {selectedCurrency}
+        </Text>
       </View>
 
       {/* Search */}
@@ -228,8 +238,7 @@ export default function AttractionsScreen() {
                 <Text style={styles.modalDesc}>{selectedEntry.description}</Text>
 
                 <View style={styles.modalInfoRow}>
-                  <InfoItem icon="cash-outline" label="Price" value={selectedEntry.price_usd > 0 ? formatPrice(selectedEntry.price_usd, 'USD') : 'Free'} />
-                  <InfoItem icon="cellular-outline" label="Local Price" value={selectedEntry.price_rwf > 0 ? formatPrice(selectedEntry.price_rwf, 'RWF') : 'Free'} />
+                  <InfoItem icon="cash-outline" label={`Price (${selectedCurrency})`} value={getEntryPriceValue(selectedEntry)} />
                 </View>
                 {selectedEntry.contact && (
                   <View style={styles.contactRow}>
@@ -255,23 +264,32 @@ const InfoItem = ({ icon, label, value }) => (
 );
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
-  header: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6 },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: '#1a1a1a' },
-  headerSub: { fontSize: 13, color: '#888', marginTop: 2 },
+  safe: { flex: 1, backgroundColor: '#F6F9FA' },
+  header: {
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 6,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5EEF0',
+  },
+  headerTitle: { fontSize: 24, fontWeight: '900', color: '#102A30' },
+  headerSub: { fontSize: 13, color: '#66777B', marginTop: 6, fontWeight: '600' },
   searchBox: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginHorizontal: 16, marginVertical: 10,
-    backgroundColor: '#f5f5f5', borderRadius: 12,
+    backgroundColor: '#FFFFFF', borderRadius: 8,
     paddingHorizontal: 12, paddingVertical: 10,
-    borderWidth: 1, borderColor: '#ebebeb',
+    borderWidth: 1, borderColor: '#E5EEF0',
   },
   searchInput: { flex: 1, fontSize: 14, color: '#333' },
   catList: { paddingHorizontal: 12, paddingBottom: 6, gap: 8 },
   catChip: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 12, paddingVertical: 7,
-    borderRadius: 20, borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fafafa',
+    borderRadius: 18, borderWidth: 1, borderColor: '#DDE8EA', backgroundColor: '#FFFFFF',
   },
   catChipActive: { backgroundColor: '#1995AD', borderColor: '#1995AD' },
   catChipText: { fontSize: 13, color: '#666' },
@@ -279,15 +297,24 @@ const styles = StyleSheet.create({
 
   // Cards
   card: {
-    backgroundColor: '#fff', borderRadius: 14, padding: 14,
-    marginBottom: 12, borderWidth: 1, borderColor: '#efefef',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
+    backgroundColor: '#FFFFFF', borderRadius: 8, padding: 14,
+    marginBottom: 12, borderWidth: 1, borderColor: '#E5EEF0',
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   categoryBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   categoryBadgeText: { fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
-  price: { fontSize: 14, fontWeight: '700', color: '#1995AD' },
+  price: {
+    minHeight: 28,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#E8F7FA',
+    color: '#137F91',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  freePrice: { backgroundColor: '#E8F5E9', color: '#2E7D32' },
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#1a1a1a', marginBottom: 4 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 6 },
   locationText: { fontSize: 12, color: '#888' },

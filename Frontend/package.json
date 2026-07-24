@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test": "node scripts/validate-icons.js",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",

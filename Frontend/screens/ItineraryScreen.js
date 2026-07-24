@@ -16,12 +16,28 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AuthContext from '../context/AuthContext';
 import apiService from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 
-const INTERESTS = ['Wildlife', 'Culture', 'Nature', 'Adventure', 'History', 'Food', 'Relaxation'];
+const INTERESTS = [
+  { label: 'Wildlife', icon: 'paw-outline' },
+  { label: 'Culture', icon: 'people-outline' },
+  { label: 'Nature', icon: 'leaf-outline' },
+  { label: 'Adventure', icon: 'flash-outline' },
+  { label: 'History', icon: 'time-outline' },
+  { label: 'Food', icon: 'restaurant-outline' },
+  { label: 'Relaxation', icon: 'water-outline' },
+  { label: 'Art', icon: 'color-palette-outline' },
+  { label: 'Coffee', icon: 'cafe-outline' },
+  { label: 'Markets', icon: 'storefront-outline' },
+  { label: 'Hiking', icon: 'walk-outline' },
+  { label: 'Lake Kivu', icon: 'boat-outline' },
+  { label: 'Gorilla Trekking', icon: 'paw-outline' },
+];
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export default function ItineraryScreen({ navigation }) {
   const { authToken, isAuthenticated, logout } = useContext(AuthContext);
+  const { selectedCurrency, getCurrencySymbol } = useCurrency();
 
   // Form state
   const [startDate, setStartDate] = useState(null);
@@ -60,6 +76,17 @@ export default function ItineraryScreen({ navigation }) {
   const getTravelDateLabel = () => {
     if (!startDate || !endDate) return '';
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  };
+
+  const getBudgetPlaceholder = () =>
+    selectedCurrency === 'RWF' ? 'e.g. 750,000' : `e.g. ${getCurrencySymbol()} 500`;
+
+  const getBudgetLabel = () => {
+    const trimmedBudget = budget.trim();
+    if (!trimmedBudget) return selectedCurrency;
+    return /\b(usd|rwf|frw)\b|\$/i.test(trimmedBudget)
+      ? trimmedBudget
+      : `${trimmedBudget} ${selectedCurrency}`;
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -125,6 +152,7 @@ export default function ItineraryScreen({ navigation }) {
       const response = await apiService.tourism.generateItinerary({
         travelDates: getTravelDateLabel(),
         budget: budget.trim(),
+        currency: selectedCurrency,
         groupSize: parseInt(groupSize) || 2,
         durationDays,
         interests: selectedInterests.map((i) => i.toLowerCase()),
@@ -172,7 +200,12 @@ export default function ItineraryScreen({ navigation }) {
       {
         icon: 'wallet-outline',
         label: 'Budget',
-        value: budget.trim(),
+        value: getBudgetLabel(),
+      },
+      {
+        icon: 'cash-outline',
+        label: 'Currency',
+        value: selectedCurrency,
       },
     ];
 
@@ -202,12 +235,18 @@ export default function ItineraryScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.resultHero}>
-            <View style={styles.resultHeroIcon}>
-              <MaterialCommunityIcons name="map-marker-path" size={28} color="#FFFFFF" />
+            <View style={styles.resultHeroTop}>
+              <View style={styles.resultHeroIcon}>
+                <MaterialCommunityIcons name="map-marker-path" size={28} color="#FFFFFF" />
+              </View>
+              <View style={styles.currencyPillDark}>
+                <Ionicons name="cash-outline" size={14} color="#DDEFF2" />
+                <Text style={styles.currencyPillDarkText}>{selectedCurrency}</Text>
+              </View>
             </View>
             <Text style={styles.resultHeroTitle}>Trip plan ready</Text>
             <Text style={styles.resultHeroText}>
-              Built from your dates, budget, group size, and selected interests.
+              Built from your dates, budget, group size, selected interests, and app currency.
             </Text>
           </View>
 
@@ -254,102 +293,132 @@ export default function ItineraryScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <ScrollView contentContainerStyle={styles.formContainer}>
         {/* Header */}
-        <View style={styles.headerRow}>
-          <MaterialCommunityIcons name="map-marker-path" size={28} color="#1995AD" />
-          <View style={{ marginLeft: 10 }}>
-            <Text style={styles.headerTitle}>Plan My Rwanda Trip</Text>
-            <Text style={styles.headerSub}>AI-powered, curated just for you</Text>
+        <View style={styles.plannerHero}>
+          <View style={styles.plannerHeroTop}>
+            <View style={styles.plannerIcon}>
+              <MaterialCommunityIcons name="map-marker-path" size={27} color="#FFFFFF" />
+            </View>
+            <View style={styles.currencyPill}>
+              <Ionicons name="cash-outline" size={14} color="#137F91" />
+              <Text style={styles.currencyPillText}>{selectedCurrency}</Text>
+            </View>
           </View>
+          <Text style={styles.headerTitle}>Plan My Rwanda Trip</Text>
+          <Text style={styles.headerSub}>
+            Match your route, pace, stays, and activities to your interests and budget.
+          </Text>
         </View>
 
         {/* Travel Dates */}
-        <Label text="Travel Dates" />
-        <View style={styles.dateRow}>
-          <DateField
-            label="Start"
-            value={formatDate(startDate)}
-            placeholder="Select date"
-            onPress={() => setActiveDatePicker('start')}
-          />
-          <DateField
-            label="End"
-            value={formatDate(endDate)}
-            placeholder="Select date"
-            onPress={() => setActiveDatePicker('end')}
-          />
-        </View>
-        {activeDatePicker && (
-          <View style={styles.pickerPanel}>
-            <DateTimePicker
-              value={(activeDatePicker === 'start' ? startDate : endDate) || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              minimumDate={activeDatePicker === 'end' && startDate ? startDate : new Date()}
-              onChange={handleDateChange}
+        <FormSection icon="calendar-outline" title="Trip Basics">
+          <View style={styles.dateRow}>
+            <DateField
+              label="Start"
+              value={formatDate(startDate)}
+              placeholder="Select date"
+              onPress={() => setActiveDatePicker('start')}
             />
-            {Platform.OS === 'ios' && (
-              <TouchableOpacity style={styles.pickerDone} onPress={() => setActiveDatePicker(null)}>
-                <Text style={styles.pickerDoneText}>Done</Text>
-              </TouchableOpacity>
-            )}
+            <DateField
+              label="End"
+              value={formatDate(endDate)}
+              placeholder="Select date"
+              onPress={() => setActiveDatePicker('end')}
+            />
           </View>
-        )}
-        {startDate && endDate && (
-          <View style={styles.durationBadge}>
-            <Ionicons name="calendar-outline" size={15} color="#1995AD" />
-            <Text style={styles.durationText}>
-              {getDurationDays()} {getDurationDays() === 1 ? 'day' : 'days'} selected
-            </Text>
-          </View>
-        )}
+          {activeDatePicker && (
+            <View style={styles.pickerPanel}>
+              <DateTimePicker
+                value={(activeDatePicker === 'start' ? startDate : endDate) || new Date()}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                minimumDate={activeDatePicker === 'end' && startDate ? startDate : new Date()}
+                onChange={handleDateChange}
+              />
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity style={styles.pickerDone} onPress={() => setActiveDatePicker(null)}>
+                  <Text style={styles.pickerDoneText}>Done</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+          {startDate && endDate && (
+            <View style={styles.durationBadge}>
+              <Ionicons name="calendar-outline" size={15} color="#1995AD" />
+              <Text style={styles.durationText}>
+                {getDurationDays()} {getDurationDays() === 1 ? 'day' : 'days'} selected
+              </Text>
+            </View>
+          )}
 
-        {/* Group Size */}
-        <Label text="Group Size" />
-        <View style={styles.counterRow}>
-          <TouchableOpacity
-            style={styles.counterBtn}
-            onPress={() => setGroupSize((v) => String(Math.max(1, parseInt(v) - 1)))}
-          >
-            <Ionicons name="remove" size={20} color="#1995AD" />
-          </TouchableOpacity>
-          <Text style={styles.counterValue}>{groupSize} {parseInt(groupSize) === 1 ? 'person' : 'people'}</Text>
-          <TouchableOpacity
-            style={styles.counterBtn}
-            onPress={() => setGroupSize((v) => String(parseInt(v) + 1))}
-          >
-            <Ionicons name="add" size={20} color="#1995AD" />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.groupBlock}>
+            <Text style={styles.inlineLabel}>Group Size</Text>
+            <View style={styles.counterRow}>
+              <TouchableOpacity
+                style={styles.counterBtn}
+                onPress={() => setGroupSize((v) => String(Math.max(1, parseInt(v) - 1)))}
+              >
+                <Ionicons name="remove" size={20} color="#1995AD" />
+              </TouchableOpacity>
+              <Text style={styles.counterValue}>{groupSize} {parseInt(groupSize) === 1 ? 'person' : 'people'}</Text>
+              <TouchableOpacity
+                style={styles.counterBtn}
+                onPress={() => setGroupSize((v) => String(parseInt(v) + 1))}
+              >
+                <Ionicons name="add" size={20} color="#1995AD" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </FormSection>
 
         {/* Budget */}
-        <Label text="Budget" />
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 500 USD or 750,000 RWF"
-          value={budget}
-          onChangeText={setBudget}
-          placeholderTextColor="#aaa"
-        />
-        <Text style={styles.budgetHint}>Type the total budget you want the itinerary to respect.</Text>
+        <FormSection icon="wallet-outline" title="Budget">
+          <View style={styles.budgetInputWrap}>
+            <View style={styles.budgetCurrencyBox}>
+              <Text style={styles.budgetCurrencySymbol}>{getCurrencySymbol()}</Text>
+              <Text style={styles.budgetCurrencyCode}>{selectedCurrency}</Text>
+            </View>
+            <TextInput
+              style={styles.budgetInput}
+              placeholder={getBudgetPlaceholder()}
+              value={budget}
+              onChangeText={setBudget}
+              placeholderTextColor="#9BA8AB"
+              keyboardType="numeric"
+            />
+          </View>
+          <Text style={styles.budgetHint}>
+            If you type only a number, it will be treated as {selectedCurrency}.
+          </Text>
+        </FormSection>
 
         {/* Interests */}
-        <Label text="Interests" />
-        <View style={styles.interestsGrid}>
-          {INTERESTS.map((interest) => {
-            const active = selectedInterests.includes(interest);
-            return (
-              <TouchableOpacity
-                key={interest}
-                style={[styles.interestChip, active && styles.interestChipActive]}
-                onPress={() => toggleInterest(interest)}
-              >
-                <Text style={[styles.interestText, active && styles.interestTextActive]}>
-                  {interest}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <FormSection
+          icon="sparkles-outline"
+          title="Interests"
+          meta={`${selectedInterests.length} selected`}
+        >
+          <View style={styles.interestsGrid}>
+            {INTERESTS.map((interest) => {
+              const active = selectedInterests.includes(interest.label);
+              return (
+                <TouchableOpacity
+                  key={interest.label}
+                  style={[styles.interestChip, active && styles.interestChipActive]}
+                  onPress={() => toggleInterest(interest.label)}
+                >
+                  <Ionicons
+                    name={interest.icon}
+                    size={15}
+                    color={active ? '#137F91' : '#7C8B8F'}
+                  />
+                  <Text style={[styles.interestText, active && styles.interestTextActive]}>
+                    {interest.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </FormSection>
 
         {/* Generate Button */}
         <TouchableOpacity
@@ -380,7 +449,20 @@ export default function ItineraryScreen({ navigation }) {
 
 // ── Small helper components ──────────────────────────────────────────────────
 
-const Label = ({ text }) => <Text style={styles.label}>{text}</Text>;
+const FormSection = ({ icon, title, meta, children }) => (
+  <View style={styles.formSection}>
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionTitleRow}>
+        <View style={styles.sectionIcon}>
+          <Ionicons name={icon} size={17} color="#1995AD" />
+        </View>
+        <Text style={styles.sectionTitle}>{title}</Text>
+      </View>
+      {!!meta && <Text style={styles.sectionMeta}>{meta}</Text>}
+    </View>
+    {children}
+  </View>
+);
 
 const DateField = ({ label, value, placeholder, onPress }) => (
   <TouchableOpacity style={styles.dateField} onPress={onPress} activeOpacity={0.85}>
@@ -498,11 +580,71 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F6F9FA' },
 
   // Form
-  formContainer: { padding: 20, paddingBottom: 40, backgroundColor: '#FFFFFF' },
-  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#1a1a1a' },
-  headerSub: { fontSize: 13, color: '#888', marginTop: 2 },
-  label: { fontSize: 14, fontWeight: '600', color: '#333', marginTop: 18, marginBottom: 8 },
+  formContainer: { padding: 16, paddingBottom: 40, backgroundColor: '#F6F9FA' },
+  plannerHero: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#E5EEF0',
+  },
+  plannerHeroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  plannerIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 8,
+    backgroundColor: '#1995AD',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: { fontSize: 24, fontWeight: '900', color: '#102A30', lineHeight: 30 },
+  headerSub: { fontSize: 13, color: '#66777B', marginTop: 8, lineHeight: 20 },
+  currencyPill: {
+    minWidth: 76,
+    height: 34,
+    paddingHorizontal: 11,
+    borderRadius: 17,
+    backgroundColor: '#E8F7FA',
+    borderWidth: 1,
+    borderColor: '#CBEAF0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  currencyPillText: { color: '#137F91', fontSize: 12, fontWeight: '900' },
+  formSection: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5EEF0',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 9, flex: 1 },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#E8F7FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: { color: '#102A30', fontSize: 15, fontWeight: '900' },
+  sectionMeta: { color: '#7C8B8F', fontSize: 12, fontWeight: '800' },
+  inlineLabel: { color: '#66777B', fontSize: 12, fontWeight: '800', marginBottom: 9 },
   input: {
     borderWidth: 1, borderColor: '#e0e0e0', borderRadius: 10,
     paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: '#333',
@@ -513,10 +655,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 11,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#F9FBFB',
   },
   dateFieldLabel: { fontSize: 11, color: '#888', marginBottom: 6, fontWeight: '600' },
   dateFieldValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -549,7 +691,37 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8F7FA',
   },
   durationText: { color: '#1995AD', fontSize: 13, fontWeight: '600' },
-  budgetHint: { color: '#999', fontSize: 12, marginTop: 6, lineHeight: 17 },
+  groupBlock: { marginTop: 16 },
+  budgetInputWrap: {
+    minHeight: 58,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DDE8EA',
+    borderRadius: 8,
+    backgroundColor: '#F9FBFB',
+    overflow: 'hidden',
+  },
+  budgetCurrencyBox: {
+    width: 86,
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E8F7FA',
+    borderRightWidth: 1,
+    borderRightColor: '#D1EAEF',
+  },
+  budgetCurrencySymbol: { color: '#137F91', fontSize: 17, fontWeight: '900' },
+  budgetCurrencyCode: { color: '#137F91', fontSize: 10, fontWeight: '900', marginTop: 2 },
+  budgetInput: {
+    flex: 1,
+    height: 56,
+    paddingHorizontal: 14,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#102A30',
+  },
+  budgetHint: { color: '#7C8B8F', fontSize: 12, marginTop: 8, lineHeight: 17 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     paddingHorizontal: 16, paddingVertical: 9,
@@ -558,23 +730,36 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#1995AD', borderColor: '#1995AD' },
   chipText: { fontSize: 13, color: '#555' },
   chipTextActive: { color: '#fff', fontWeight: '600' },
-  counterRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+  counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   counterBtn: {
-    width: 38, height: 38, borderRadius: 19,
-    borderWidth: 1.5, borderColor: '#1995AD',
-    justifyContent: 'center', alignItems: 'center',
+    width: 42,
+    height: 42,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#1995AD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
   },
-  counterValue: { fontSize: 16, fontWeight: '600', color: '#333', minWidth: 90, textAlign: 'center' },
+  counterValue: { fontSize: 16, fontWeight: '900', color: '#102A30', minWidth: 130, textAlign: 'center' },
   interestsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   interestChip: {
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1, borderColor: '#ddd', backgroundColor: '#fafafa',
+    minHeight: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#DDE8EA',
+    backgroundColor: '#F9FBFB',
   },
   interestChipActive: { backgroundColor: '#E8F7FA', borderColor: '#1995AD' },
-  interestText: { fontSize: 13, color: '#555' },
-  interestTextActive: { color: '#1995AD', fontWeight: '600' },
+  interestText: { fontSize: 13, color: '#536569', fontWeight: '700' },
+  interestTextActive: { color: '#137F91', fontWeight: '900' },
   generateBtn: {
-    marginTop: 28, backgroundColor: '#1995AD', borderRadius: 12,
+    marginTop: 10, backgroundColor: '#1995AD', borderRadius: 8,
     paddingVertical: 16, alignItems: 'center',
     shadowColor: '#1995AD', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
     elevation: 5,
@@ -622,6 +807,12 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 12,
   },
+  resultHeroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
   resultHeroIcon: {
     width: 48,
     height: 48,
@@ -629,8 +820,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#1995AD',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 14,
   },
+  currencyPillDark: {
+    minWidth: 76,
+    height: 34,
+    paddingHorizontal: 11,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  currencyPillDarkText: { color: '#DDEFF2', fontSize: 12, fontWeight: '900' },
   resultHeroTitle: { color: '#FFFFFF', fontSize: 24, fontWeight: '900' },
   resultHeroText: { color: '#DDEFF2', fontSize: 13, lineHeight: 20, marginTop: 6 },
   summaryGrid: {
