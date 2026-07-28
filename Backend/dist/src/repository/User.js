@@ -266,6 +266,43 @@ class AuthenticationRepository {
                 .where((0, drizzle_orm_1.eq)(schema_1.userTable.email, email));
         });
     }
+    deleteUserAccount(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [user] = yield database_1.database
+                .select({
+                id: schema_1.userTable.id,
+                email: schema_1.userTable.email,
+                username: schema_1.userTable.username
+            })
+                .from(schema_1.userTable)
+                .where((0, drizzle_orm_1.eq)(schema_1.userTable.id, userId))
+                .limit(1);
+            if (!user)
+                return null;
+            const userBookings = yield database_1.database
+                .select({ id: schema_1.bookings.id })
+                .from(schema_1.bookings)
+                .where((0, drizzle_orm_1.eq)(schema_1.bookings.user_id, userId));
+            const bookingIds = userBookings.map((booking) => booking.id);
+            if (bookingIds.length > 0) {
+                yield database_1.database
+                    .delete(schema_1.bookingRoomTypes)
+                    .where((0, drizzle_orm_1.inArray)(schema_1.bookingRoomTypes.booking_id, bookingIds));
+            }
+            yield database_1.database.delete(schema_1.bookings).where((0, drizzle_orm_1.eq)(schema_1.bookings.user_id, userId));
+            yield database_1.database.delete(schema_1.reviews).where((0, drizzle_orm_1.eq)(schema_1.reviews.user_id, userId));
+            yield database_1.database.delete(schema_1.wishlists).where((0, drizzle_orm_1.eq)(schema_1.wishlists.user_id, userId));
+            yield database_1.database.delete(schema_1.notifications).where((0, drizzle_orm_1.eq)(schema_1.notifications.user_id, userId));
+            yield database_1.database
+                .update(schema_1.tourismEntries)
+                .set({ createdBy: null })
+                .where((0, drizzle_orm_1.eq)(schema_1.tourismEntries.createdBy, userId));
+            yield database_1.database
+                .delete(schema_1.userTable)
+                .where((0, drizzle_orm_1.eq)(schema_1.userTable.id, userId));
+            return user;
+        });
+    }
     generateSecurePassword() {
         const lowercase = 'abcdefghijklmnopqrstuvwxyz';
         const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

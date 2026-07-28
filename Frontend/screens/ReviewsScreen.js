@@ -16,7 +16,6 @@ import {
   ScrollView
 } from "react-native";
 import React, { useState, useContext, useEffect } from "react";
-import { data } from "../data/reviewdata";
 import * as ImagePicker from 'expo-image-picker';
 import axios from "axios";
 import AuthContext from "../context/AuthContext";
@@ -27,7 +26,14 @@ const ReviewsScreen = () => {
   const [comment, setComment] = useState("");
   const [userRating, setUserRating] = useState(0);
   const [attachments, setAttachments] = useState([]);
-  const {currentID, ip, userId, setReview, review} = useContext(AuthContext);
+  const {
+    currentID,
+    ip,
+    setReview,
+    review,
+    authToken,
+    isAuthenticated,
+  } = useContext(AuthContext);
   const [allReviews, setAllReviews] = useState([]);
   const [filteredReviews, setFilteredReviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -364,6 +370,11 @@ const ReviewsScreen = () => {
       return;
     }
 
+    if (!isAuthenticated || !authToken) {
+      Alert.alert("Login Required", "Please sign in before posting a review.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -391,6 +402,8 @@ const ReviewsScreen = () => {
         };
         headers['Content-Type'] = 'application/json';
       }
+
+      headers.Authorization = `Bearer ${authToken}`;
 
       console.log('Posting review to:', `http://${ip}:8000/api/v1/hotels/reviews/create/${currentID}`);
 

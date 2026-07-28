@@ -1,11 +1,21 @@
 import { database } from '../utils/config/database';
-import { userProfiles, userRolesTable, userTable } from '../utils/config/schema';
+import {
+  bookingRoomTypes,
+  bookings,
+  notifications,
+  reviews,
+  tourismEntries,
+  userProfiles,
+  userRolesTable,
+  userTable,
+  wishlists
+} from '../utils/config/schema';
 import {
   CreatedUserType,
   NoDataResponse, RegisterUserTypes, RoleOptions
 
 } from '../utils/types';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { hash } from 'bcrypt';
 import { HttpStatusCodes } from '../utils/helpers';
 import { SECRETS } from '../utils/helpers';
@@ -238,6 +248,48 @@ export class AuthenticationRepository {
       .update(userTable)
       .set({ email_verified: true })
       .where(eq(userTable.email, email));
+  }
+
+  async deleteUserAccount(userId: string): Promise<PublicUserData | null> {
+    const [user] = await database
+      .select({
+        id: userTable.id,
+        email: userTable.email,
+        username: userTable.username
+      })
+      .from(userTable)
+      .where(eq(userTable.id, userId))
+      .limit(1);
+
+    if (!user) return null;
+
+    const userBookings = await database
+      .select({ id: bookings.id })
+      .from(bookings)
+      .where(eq(bookings.user_id, userId));
+
+    const bookingIds = userBookings.map((booking) => booking.id);
+
+    if (bookingIds.length > 0) {
+      await database
+        .delete(bookingRoomTypes)
+        .where(inArray(bookingRoomTypes.booking_id, bookingIds));
+    }
+
+    await database.delete(bookings).where(eq(bookings.user_id, userId));
+    await database.delete(reviews).where(eq(reviews.user_id, userId));
+    await database.delete(wishlists).where(eq(wishlists.user_id, userId));
+    await database.delete(notifications).where(eq(notifications.user_id, userId));
+    await database
+      .update(tourismEntries)
+      .set({ createdBy: null })
+      .where(eq(tourismEntries.createdBy, userId));
+
+    await database
+      .delete(userTable)
+      .where(eq(userTable.id, userId));
+
+    return user;
   }
 
   generateSecurePassword(): string {

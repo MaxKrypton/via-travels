@@ -75,6 +75,8 @@ class ApiService {
     
     updatePassword: (currentPassword, newPassword) => 
       this.client.patch('/auth/update-password', { currentPassword, newPassword }),
+
+    deleteAccount: () => this.client.delete('/auth/me'),
   };
 
   // ============= PROFILE =============
@@ -188,7 +190,7 @@ class ApiService {
     
     getById: (reviewId) => this.client.get(`/hotels/reviews/${reviewId}`),
     
-    getByHotel: (hotelId) => this.client.get(`/hotels/reviews/${hotelId}`),
+    getByHotel: (hotelId) => this.client.get(`/hotels/reviews/hotel/${hotelId}`),
     
     create: (hotelId, data) => {
       const formData = new FormData();

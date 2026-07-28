@@ -80,6 +80,9 @@ Router.patch('/update-password', (req, res) => __awaiter(void 0, void 0, void 0,
 Router.post('/logout', authMiddleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     authService.logout(req, res);
 }));
+Router.delete('/me', authMiddleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    authService.deleteAccount(req, res);
+}));
 // Test endpoint to verify email configuration
 Router.post('/test-email', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

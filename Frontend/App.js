@@ -1,30 +1,35 @@
-import { StyleSheet, Text, View } from 'react-native';
 import AppNavigation from "./Navigation/AppNavigation"
-import React, { useState } from "react";
+import React, { useContext, useEffect } from "react";
 import UserContexProvider from './context/AuthContextProvider';
+import AuthContext from './context/AuthContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { GestureHandlerRootView } from "react-native-gesture-handler"
+import * as SplashScreen from "expo-splash-screen";
 
+SplashScreen.preventAutoHideAsync();
+
+const AppContent = () => {
+  const { isLoading } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  return (
+    <CurrencyProvider>
+      <AppNavigation />
+    </CurrencyProvider>
+  );
+};
 
 export default function App() {
-  const [showSplashScreen, setShowSplashScreen] = useState(true)
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <UserContexProvider>
-        <CurrencyProvider>
-          <AppNavigation />
-        </CurrencyProvider>
+        <AppContent />
       </UserContexProvider>
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

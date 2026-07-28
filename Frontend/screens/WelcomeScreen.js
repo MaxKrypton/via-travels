@@ -13,10 +13,12 @@ import React, { useState, useEffect } from "react";
 import SignInScreen from "./SigninScreen";
 import SignUpScreen from "./SignUpScreen";
 import { LinearGradient } from "expo-linear-gradient"; // Note: You'll need to install expo-linear-gradient
+import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
 const WelcomeScreen = () => {
+  const navigation = useNavigation();
   // Initialize state with default values
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
@@ -43,6 +45,11 @@ const WelcomeScreen = () => {
   const openSignUp = () => setShowSignUp(true);
   const closeSignIn = () => setShowSignIn(false);
   const closeSignUp = () => setShowSignUp(false);
+  const openLegalDocument = () => {
+    setShowSignIn(false);
+    setShowSignUp(false);
+    navigation.navigate("TermsCondition");
+  };
 
   return (
     <View style={styles.container}>
@@ -117,7 +124,7 @@ const WelcomeScreen = () => {
             </Pressable>
           </View>
           <View style={styles.modalContent}>
-            <SignInScreen />
+            <SignInScreen onOpenLegal={openLegalDocument} />
           </View>
         </View>
       </Modal>
@@ -137,7 +144,7 @@ const WelcomeScreen = () => {
             </Pressable>
           </View>
           <View style={styles.modalContent}>
-            <SignUpScreen />
+            <SignUpScreen onOpenLegal={openLegalDocument} />
           </View>
         </View>
       </Modal>

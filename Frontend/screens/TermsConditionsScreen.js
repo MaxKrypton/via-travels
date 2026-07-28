@@ -1,283 +1,241 @@
 import {
-    StyleSheet,
-    Text,
-    View,
-    SafeAreaView,
-    ScrollView,
-    TouchableOpacity
-  } from "react-native";
-  import React from "react";
-  import { useNavigation } from "@react-navigation/native";
-  import Ionicons from "@expo/vector-icons/Ionicons";
-  
-  const TermsConditionsScreen = () => {
-    const navigation = useNavigation();
-  
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Terms & Conditions</Text>
-          <View style={{ width: 24 }} />
-        </View>
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-        <ScrollView style={styles.scrollContainer}>
-          <View style={styles.section}>
-            <Text style={styles.lastUpdated}>Last Updated: July 19, 2026</Text>
+// Via Travels — Privacy Policy
+// A readable policy document (separate from the Privacy *Settings* screen).
+// This is the page to navigate to and walk through in the assessment video.
+// Written in line with Rwanda's Law No. 058/2021 on the protection of
+// personal data and privacy (consent, data localization, retention, rights).
+// NOTE: Replace the contact email below with your real project contact.
 
-            <Text style={styles.introText}>
-              Please read these Terms and Conditions ("Terms") carefully before
-              using the Via Travels mobile application (the "Service"). Via
-              Travels is an intelligent travel planning application for tourism
-              in Rwanda, developed as a capstone research project at the
-              African Leadership University ("we", "us", or "our").
+const PrivacyPolicyScreen = () => {
+  const navigation = useNavigation();
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Privacy Policy</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.section}>
+          <Text style={styles.lastUpdated}>Last updated: July 2026</Text>
+
+          <Text style={styles.introText}>
+            This Privacy Policy explains what personal data Via Travels collects,
+            why we collect it, and the choices you have. We handle your data in
+            line with Rwanda's Law No. 058/2021 relating to the protection of
+            personal data and privacy.
+          </Text>
+
+          {/* 1 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>1. Information We Collect</Text>
+            <Text style={styles.termContent}>
+              1.1. Account information: your email address and password (stored
+              securely).
             </Text>
-
-            <Text style={styles.introText}>
-              Your access to and use of the Service is conditioned upon your
-              acceptance of and compliance with these Terms. These Terms apply
-              to all visitors, users, and others who wish to access or use the
-              Service.
+            <Text style={styles.termContent}>
+              1.2. Trip preferences: travel dates, budget range, group size, and
+              interests, which you enter to generate an itinerary.
             </Text>
-
-            <Text style={styles.introText}>
-              By accessing or using the Service, you agree to be bound by these
-              Terms. If you disagree with any part of the Terms, you do not
-              have permission to access the Service.
+            <Text style={styles.termContent}>
+              1.3. Saved itineraries and any feedback you choose to submit.
             </Text>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>1. Nature of the Service</Text>
-              <Text style={styles.termContent}>
-                1.1. Via Travels helps you plan trips to Rwanda. Based on your
-                travel dates, budget, group size, and interests, the Service
-                generates personalized day-by-day itineraries covering
-                accommodation options, attractions, activities, transport, and
-                estimated costs in Rwandan Francs (RWF) and US Dollars (USD).
-              </Text>
-              <Text style={styles.termContent}>
-                1.2. You are responsible for maintaining the confidentiality of
-                your account and password and for all activity that occurs
-                under your account.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>
-                2. AI-Generated Itineraries
-              </Text>
-              <Text style={styles.termContent}>
-                2.1. Itineraries are generated by an artificial intelligence
-                model grounded in a curated dataset of Rwanda tourism
-                information verified against official sources, including
-                Rwanda Development Board listings and confirmed local
-                operators.
-              </Text>
-              <Text style={styles.termContent}>
-                2.2. Prices, permit fees, opening hours, and availability
-                reflect the most recent verification date of each entry and
-                may have changed since. Always confirm current prices, permit
-                requirements, and availability directly with the relevant
-                provider or the Rwanda Development Board before committing to
-                travel arrangements.
-              </Text>
-              <Text style={styles.termContent}>
-                2.3. Generated itineraries are planning suggestions, not
-                professional travel advice, and do not constitute an offer or
-                guarantee of any service by any accommodation, activity, or
-                transport provider mentioned.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>
-                3. No Bookings or Payments
-              </Text>
-              <Text style={styles.termContent}>
-                3.1. The Service is an informational planning tool. It does not
-                process bookings, reservations, or payments, and does not
-                check real-time availability or live pricing.
-              </Text>
-              <Text style={styles.termContent}>
-                3.2. Any booking you make with a provider listed in an
-                itinerary is a direct agreement between you and that provider.
-                We are not a party to that agreement and are not responsible
-                for its performance, cancellation, or refund terms.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>4. User Content</Text>
-              <Text style={styles.termContent}>
-                4.1. The Service allows you to save itineraries and submit
-                ratings and feedback comments ("Content"). You are responsible
-                for the Content you submit, including its legality and
-                appropriateness.
-              </Text>
-              <Text style={styles.termContent}>
-                4.2. By submitting Content, you grant us a non-exclusive
-                license to store and use it to operate and improve the
-                Service, including aggregated, anonymized analysis of
-                feedback scores.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>
-                5. Data Privacy
-              </Text>
-              <Text style={styles.termContent}>
-                5.1. We collect only the information needed to operate the
-                Service: your account details (name, email), your travel
-                preference inputs, saved itineraries, and feedback.
-              </Text>
-              <Text style={styles.termContent}>
-                5.2. Personal data is processed in accordance with Law No.
-                058/2021 of 13/10/2021 Relating to the Protection of Personal
-                Data and Privacy of the Republic of Rwanda. Your data is not
-                sold or shared with third parties for marketing purposes.
-              </Text>
-              <Text style={styles.termContent}>
-                5.3. Where the Service is used in research evaluation
-                sessions, participation is governed by a separate informed
-                consent process; evaluation responses are anonymized and are
-                not linked to your account in any published results.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>6. Research Prototype</Text>
-              <Text style={styles.termContent}>
-                The Service is provided as a research prototype developed as
-                part of a BSc. Software Engineering capstone project. Features,
-                data coverage, and availability may change, and the Service
-                may be interrupted, modified, or discontinued without notice.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>7. Intellectual Property</Text>
-              <Text style={styles.termContent}>
-                The Service and its original content (excluding Content
-                submitted by users), features, and functionality remain our
-                exclusive property. Third-party names, trademarks, and listings
-                referenced in itineraries (such as hotels, parks, and
-                attractions) remain the property of their respective owners and
-                are used for informational purposes only.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>8. Limitation of Liability</Text>
-              <Text style={styles.termContent}>
-                To the maximum extent permitted by applicable law, we shall not
-                be liable for any indirect, incidental, special, consequential,
-                or punitive damages, or any loss of profits or data, arising
-                from (i) your access to or use of, or inability to access or
-                use, the Service; (ii) reliance on any itinerary, price
-                estimate, or other information generated by the Service; or
-                (iii) the acts or omissions of any third-party provider
-                referenced in an itinerary.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>9. Governing Law</Text>
-              <Text style={styles.termContent}>
-                These Terms shall be governed by and construed in accordance
-                with the laws of the Republic of Rwanda, without regard to its
-                conflict of law provisions. Our failure to enforce any right or
-                provision of these Terms will not be considered a waiver of
-                those rights.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>10. Changes to Terms</Text>
-              <Text style={styles.termContent}>
-                We reserve the right to modify or replace these Terms at any
-                time. If a revision is material, we will provide reasonable
-                notice within the application before the new terms take
-                effect.
-              </Text>
-            </View>
-
-            <View style={styles.termsSection}>
-              <Text style={styles.termTitle}>11. Contact Us</Text>
-              <Text style={styles.termContent}>
-                If you have any questions about these Terms, please contact us
-                at support@viatravels.app.
-              </Text>
-            </View>
+            <Text style={styles.termContent}>
+              1.4. We do NOT collect payment or banking details, and we do NOT
+              sell your data to anyone.
+            </Text>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  };
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#f8f9fa",
-    },
-    header: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: 16,
-      backgroundColor: "white",
-      borderBottomWidth: 1,
-      borderBottomColor: "#e1e4e8",
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: "#333",
-    },
-    scrollContainer: {
-      flex: 1,
-    },
-    section: {
-      backgroundColor: "white",
-      margin: 16,
-      padding: 16,
-      borderRadius: 8,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      elevation: 2,
-    },
-    lastUpdated: {
-      fontSize: 14,
-      color: "#777",
-      marginBottom: 16,
-      fontStyle: "italic",
-    },
-    introText: {
-      fontSize: 16,
-      color: "#333",
-      lineHeight: 24,
-      marginBottom: 16,
-    },
-    termsSection: {
-      marginTop: 16,
-      marginBottom: 24,
-    },
-    termTitle: {
-      fontSize: 18,
-      fontWeight: "600",
-      color: "#333",
-      marginBottom: 8,
-    },
-    termContent: {
-      fontSize: 16,
-      color: "#333",
-      lineHeight: 24,
-      marginBottom: 8,
-    },
-  });
-  
-  export default TermsConditionsScreen;
+
+          {/* 2 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>2. How We Use Your Data</Text>
+            <Text style={styles.termContent}>
+              We use your preferences to generate personalised Rwanda itineraries,
+              to let you save and revisit them, and to improve the app. Where the
+              app is used for research or usability testing, responses are kept
+              anonymous and are not linked to you in any results.
+            </Text>
+          </View>
+
+          {/* 3 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>3. Consent</Text>
+            <Text style={styles.termContent}>
+              We process your personal data based on your consent, which you give
+              when you create an account and use the app. You can withdraw your
+              consent at any time by deleting your account, and you may take part
+              in any testing entirely voluntarily.
+            </Text>
+          </View>
+
+          {/* 4 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>4. Sharing With Third Parties</Text>
+            <Text style={styles.termContent}>
+              4.1. To create your itinerary, your trip preferences are sent to a
+              third-party AI (large language model) service. We send only the
+              information needed to generate the plan and avoid including details
+              that could identify you personally.
+            </Text>
+            <Text style={styles.termContent}>
+              4.2. We do not share your data with advertisers and we do not sell
+              it.
+            </Text>
+          </View>
+
+          {/* 5 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>5. Where Your Data Is Stored</Text>
+            <Text style={styles.termContent}>
+              Account data and itineraries are stored in a secured cloud database.
+              Under Law No. 058/2021, personal data relating to people in Rwanda
+              should be stored in Rwanda unless the National Cyber Security
+              Authority (NCSA) authorises storage elsewhere. We take this
+              requirement into account when configuring where data is held.
+            </Text>
+          </View>
+
+          {/* 6 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>6. How Long We Keep It</Text>
+            <Text style={styles.termContent}>
+              We keep your data only for as long as it is needed for the purpose
+              it was collected. Data gathered for research or usability testing is
+              anonymised and destroyed once the analysis is complete.
+            </Text>
+          </View>
+
+          {/* 7 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>7. Your Rights</Text>
+            <Text style={styles.termContent}>
+              You have the right to access the personal data we hold about you, to
+              correct it, to request its deletion, and to withdraw your consent.
+              You can request account deletion from within the app's privacy
+              settings.
+            </Text>
+          </View>
+
+          {/* 8 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>8. Security</Text>
+            <Text style={styles.termContent}>
+              We protect your account using secure login tokens (JWT) and
+              encrypted connections between the app and our servers. No system is
+              perfectly secure, but we take reasonable steps to keep your data
+              safe.
+            </Text>
+          </View>
+
+          {/* 9 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>9. Children</Text>
+            <Text style={styles.termContent}>
+              Via Travels is intended for adult travellers and is not directed at
+              children. We do not knowingly collect data from children.
+            </Text>
+          </View>
+
+          {/* 10 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>10. Changes to This Policy</Text>
+            <Text style={styles.termContent}>
+              We may update this Policy as the app develops. If a change is
+              significant, we will notify you in the app.
+            </Text>
+          </View>
+
+          {/* 11 */}
+          <View style={styles.termsSection}>
+            <Text style={styles.termTitle}>11. Contact Us</Text>
+            <Text style={styles.termContent}>
+              For any privacy question or request, contact us at
+              privacy@viatravels.rw (Kigali, Rwanda).
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e1e4e8",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  section: {
+    backgroundColor: "white",
+    margin: 16,
+    padding: 16,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  lastUpdated: {
+    fontSize: 14,
+    color: "#777",
+    marginBottom: 16,
+    fontStyle: "italic",
+  },
+  introText: {
+    fontSize: 16,
+    color: "#333",
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  termsSection: {
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  termTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  termContent: {
+    fontSize: 16,
+    color: "#333",
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+});
+
+export default PrivacyPolicyScreen;

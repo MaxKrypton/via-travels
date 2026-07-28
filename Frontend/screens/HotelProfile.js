@@ -328,7 +328,7 @@ const HotelProfile = () => {
                 <Text style={styles.seeAllButton}>See all</Text>
               </TouchableOpacity>
             </View>
-            <Reviews />
+            <Reviews hotelId={currentID} limit={2} />
           </View>
 
           {/* Hotel Menu */}

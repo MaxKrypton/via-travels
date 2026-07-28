@@ -13,6 +13,7 @@ const UserContexProvider = ({ children }) => {
   const [currentID, setCurrentID] = useState(null);
   const [currentRoomId, setCurrentRoomId] = useState(null);
   const [review, setReview] = useState(null);
+  const [authRedirectScreen, setAuthRedirectScreen] = useState("Welcome");
   const ip = API_HOST;
   const [signedIn, setSignedIn] = useState(true)
 
@@ -78,6 +79,7 @@ const UserContexProvider = ({ children }) => {
       apiService.setAuthToken(token);
       setUser(userData);
       setIsAuthenticated(true);
+      setAuthRedirectScreen("Welcome");
 
       console.log("✅ Login successful");
     } catch (error) {
@@ -137,6 +139,8 @@ const UserContexProvider = ({ children }) => {
     updateUser,
     signedIn,
     setSignedIn,
+    authRedirectScreen,
+    setAuthRedirectScreen,
 
     // Hotel data
     hotelData,

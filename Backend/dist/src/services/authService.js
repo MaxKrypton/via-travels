@@ -374,5 +374,43 @@ class AuthenticationService {
             return res.status(helpers_1.HttpStatusCodes.OK).json({ message: 'Successfully logged out' });
         });
     }
+    deleteAccount(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+            if (!userId) {
+                return res.status(helpers_1.HttpStatusCodes.UNAUTHORIZED).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+            }
+            try {
+                const deletedUser = yield this.repository.deleteUserAccount(userId);
+                if (!deletedUser) {
+                    return res.status(helpers_1.HttpStatusCodes.NOT_FOUND).json({
+                        success: false,
+                        message: 'User account not found'
+                    });
+                }
+                res.clearCookie('access_token', {
+                    httpOnly: true,
+                });
+                return res.status(helpers_1.HttpStatusCodes.OK).json({
+                    success: true,
+                    message: 'Account deleted successfully',
+                    data: {
+                        user: deletedUser
+                    }
+                });
+            }
+            catch (error) {
+                console.error('Delete account error:', error);
+                return res.status(helpers_1.HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+                    success: false,
+                    message: 'An error occurred while deleting your account'
+                });
+            }
+        });
+    }
 }
 exports.AuthenticationService = AuthenticationService;

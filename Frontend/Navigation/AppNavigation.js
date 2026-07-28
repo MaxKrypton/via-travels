@@ -126,7 +126,7 @@ const ProfileNavigator = () => (
 
 // ── Root ─────────────────────────────────────────────────────────────────────
 export default function AppNavigation() {
-  const { isAuthenticated, isLoading } = useContext(AuthContext);
+  const { isAuthenticated, isLoading, authRedirectScreen } = useContext(AuthContext);
 
   return (
     <NavigationContainer>
@@ -137,10 +137,11 @@ export default function AppNavigation() {
       ) : isAuthenticated ? (
         <TabNavigator />
       ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName={authRedirectScreen || "Welcome"} screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="SignIn" component={SignInScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="TermsCondition" component={TermsConditionsScreen} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

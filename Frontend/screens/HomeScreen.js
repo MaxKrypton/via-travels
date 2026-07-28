@@ -15,7 +15,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import LivePlaces from "../components/LivePlaces";
 import SponsoredPost from "../components/SponsoredPost";
 import { useFonts } from 'expo-font';
-import * as SplashScreen from "expo-splash-screen"
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Octicons from '@expo/vector-icons/Octicons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -25,9 +24,6 @@ import AuthContext from "../context/AuthContext";
 import TopHotels from "../components/TopHotels";
 import apiService from "../services/api";
 
-
-SplashScreen.preventAutoHideAsync();
-
 const HomeScreen = () => {
   const navigation = useNavigation()
   const [loaded, error] = useFonts({
@@ -36,13 +32,6 @@ const HomeScreen = () => {
   });
   const { saveHotelData } = useContext(AuthContext)
   const [posts, setPosts] = useState([])
-
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
-    
-  }, [loaded, error]);
 
   useEffect(() => {
     const fetchHomeData = async () => {

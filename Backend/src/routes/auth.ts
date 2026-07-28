@@ -44,6 +44,10 @@ Router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
   authService.logout(req, res);
 });
 
+Router.delete('/me', authMiddleware, async (req: Request, res: Response) => {
+  authService.deleteAccount(req, res);
+});
+
 // Test endpoint to verify email configuration
 Router.post('/test-email', async (req: Request, res: Response) => {
   try {

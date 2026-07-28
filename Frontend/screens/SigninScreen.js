@@ -19,7 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AuthContext from "../context/AuthContext";
 
-const SignInScreen = ({ route = {} }) => {
+const SignInScreen = ({ route = {}, onOpenLegal }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
@@ -29,6 +29,15 @@ const SignInScreen = ({ route = {} }) => {
   // Get return navigation params if coming from another screen
   const returnTo = route.params?.returnTo;
   const returnParams = route.params?.returnParams;
+
+  const openLegalDocument = () => {
+    if (onOpenLegal) {
+      onOpenLegal();
+      return;
+    }
+
+    navigation.navigate("TermsCondition");
+  };
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -163,8 +172,8 @@ const SignInScreen = ({ route = {} }) => {
         <View style={{ width: "90%", marginLeft: 30 }}>
           <Text style={{ marginTop: 20, textAlign: "center" }}>
             By logging in you confirm that you accept our
-            <Text style={{ color: "#1995AD" }}> Terms of Use</Text> and{" "}
-            <Text style={{ color: "#1995AD" }}>Privacy Policy</Text>
+            <Text style={styles.legalLink} onPress={openLegalDocument}> Terms of Use</Text> and{" "}
+            <Text style={styles.legalLink} onPress={openLegalDocument}>Privacy Policy</Text>
           </Text>
         </View>
 
@@ -234,6 +243,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 17,
     color: "white",
+  },
+  legalLink: {
+    color: "#1995AD",
+    fontWeight: "600",
   },
 });
 

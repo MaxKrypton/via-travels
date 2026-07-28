@@ -21,13 +21,22 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthContext from "../context/AuthContext";
 
-const SignUpScreen = () => {
+const SignUpScreen = ({ onOpenLegal }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
   const { setSignedIn, ip } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
+
+  const openLegalDocument = () => {
+    if (onOpenLegal) {
+      onOpenLegal();
+      return;
+    }
+
+    navigation.navigate("TermsCondition");
+  };
 
   const handleSignUp = async () => {
     if (!name || !email || !password) {
@@ -170,8 +179,8 @@ const SignUpScreen = () => {
         <View style={{ width: "87%", marginLeft: "10%", marginTop: 20 }}>
           <Text style={{ textAlign: "center" }}>
             By Registering you confirm that you accept our
-            <Text style={{ color: "#1995AD" }}> Terms of Use</Text> and{" "}
-            <Text style={{ color: "#1995AD" }}>Privacy Policy</Text>
+            <Text style={styles.legalLink} onPress={openLegalDocument}> Terms of Use</Text> and{" "}
+            <Text style={styles.legalLink} onPress={openLegalDocument}>Privacy Policy</Text>
           </Text>
         </View>
 
@@ -235,6 +244,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 17,
     color: "white",
+  },
+  legalLink: {
+    color: "#1995AD",
+    fontWeight: "600",
   },
 });
 

@@ -426,4 +426,44 @@ export class AuthenticationService {
     // Send a response indicating successful logout
     return res.status(HttpStatusCodes.OK).json({ message: 'Successfully logged out' });
   }
+
+  async deleteAccount(req: Request, res: Response): Promise<Response> {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(HttpStatusCodes.UNAUTHORIZED).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    try {
+      const deletedUser = await this.repository.deleteUserAccount(userId);
+
+      if (!deletedUser) {
+        return res.status(HttpStatusCodes.NOT_FOUND).json({
+          success: false,
+          message: 'User account not found'
+        });
+      }
+
+      res.clearCookie('access_token', {
+        httpOnly: true,
+      });
+
+      return res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: 'Account deleted successfully',
+        data: {
+          user: deletedUser
+        }
+      });
+    } catch (error) {
+      console.error('Delete account error:', error);
+      return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'An error occurred while deleting your account'
+      });
+    }
+  }
 }

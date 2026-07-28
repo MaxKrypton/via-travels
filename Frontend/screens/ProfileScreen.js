@@ -34,10 +34,11 @@ const normalizeProfile = (profile = {}) => ({
 });
 
 const ProfileScreen = () => {
-  const { user, isAuthenticated, logout, authToken, ip, updateUser } = useContext(AuthContext);
+  const { user, isAuthenticated, logout, authToken, ip, updateUser, setAuthRedirectScreen } = useContext(AuthContext);
   const { selectedCurrency, getCurrencySymbol } = useCurrency();
   const navigation = useNavigation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [profile, setProfile] = useState(() => normalizeProfile(user));
 
@@ -118,6 +119,42 @@ const ProfileScreen = () => {
     }
   };
 
+  const performDeleteAccount = async () => {
+    if (isDeletingAccount) return;
+
+    try {
+      setIsDeletingAccount(true);
+      await apiService.auth.deleteAccount();
+      setAuthRedirectScreen?.("SignIn");
+      await logout();
+    } catch (error) {
+      console.error("❌ Delete account error:", error);
+      Alert.alert(
+        "Delete Failed",
+        error.response?.data?.message || "We could not delete your account right now. Please try again."
+      );
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "This will permanently delete your Via Travels account and sign you out. This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: performDeleteAccount,
+        },
+      ]
+    );
+  };
+
   if (!isAuthenticated) {
     return (
       <Modal visible={!isAuthenticated} animationType="slide">
@@ -194,7 +231,21 @@ const ProfileScreen = () => {
                   icon={<MaterialIcons name="privacy-tip" size={22} color="#1995AD" />}
                   title="Privacy"
                   onPress={() => navigation.navigate("Privacy")}
+                />
+                <MenuItem
+                  icon={
+                    isDeletingAccount ? (
+                      <ActivityIndicator size="small" color="#FF3B30" />
+                    ) : (
+                      <MaterialIcons name="delete-forever" size={22} color="#FF3B30" />
+                    )
+                  }
+                  title={isDeletingAccount ? "Deleting Account..." : "Delete Account"}
+                  subtitle="Permanently remove your account data"
+                  onPress={handleDeleteAccount}
                   showBorder={false}
+                  danger
+                  disabled={isDeletingAccount}
                 />
               </View>
             </View>
@@ -287,23 +338,28 @@ const ProfileScreen = () => {
 };
 
 // Reusable MenuItem Component
-const MenuItem = ({ icon, title, subtitle, onPress, showBorder = true }) => {
+const MenuItem = ({ icon, title, subtitle, onPress, showBorder = true, danger = false, disabled = false }) => {
   return (
     <TouchableOpacity
-      style={[styles.menuItem, showBorder && styles.menuItemBorder]}
+      style={[
+        styles.menuItem,
+        showBorder && styles.menuItemBorder,
+        disabled && styles.menuItemDisabled,
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
+      disabled={disabled}
     >
       <View style={styles.menuItemLeft}>
-        <View style={styles.iconContainer}>
+        <View style={[styles.iconContainer, danger && styles.dangerIconContainer]}>
           {icon}
         </View>
         <View style={styles.menuItemTextContainer}>
-          <Text style={styles.menuItemText}>{title}</Text>
+          <Text style={[styles.menuItemText, danger && styles.dangerMenuItemText]}>{title}</Text>
           {subtitle && <Text style={styles.menuItemSubtitle}>{subtitle}</Text>}
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#8E8E93" />
+      <Ionicons name="chevron-forward" size={20} color={danger ? "#FF3B30" : "#8E8E93"} />
     </TouchableOpacity>
   );
 };
@@ -424,6 +480,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: "#E5E5EA",
   },
+  menuItemDisabled: {
+    opacity: 0.6,
+  },
   menuItemLeft: {
     flexDirection: "row",
     alignItems: "center",
@@ -438,6 +497,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
+  dangerIconContainer: {
+    backgroundColor: "rgba(255, 59, 48, 0.1)",
+  },
   menuItemTextContainer: {
     flex: 1,
   },
@@ -445,6 +507,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#1C1C1E",
+  },
+  dangerMenuItemText: {
+    color: "#FF3B30",
   },
   menuItemSubtitle: {
     fontSize: 13,
